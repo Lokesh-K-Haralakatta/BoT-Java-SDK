@@ -1,0 +1,74 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.finn.bot</groupId>
+  <artifactId>BoT-Java-SDK</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>BoT-Java-SDK</name>
+  <description>Finn Banking of Things Java SDK</description>
+  <organization>
+    <name>FINN - Banking of Things</name>
+    <url>http://www.makethingsfinn.com</url>
+  </organization>
+  <developers>
+    <developer>
+      <id>lokesh</id>
+      <name>Lokesh K Haralakatta</name>
+      <email>lokeshkot@hcl.com</email>
+      <url>https://in.linkedin.com/in/lokesh-h-k-664b93157</url>
+      <organization>HCL</organization>
+      <organizationUrl>https://www.hcltech.com/</organizationUrl>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <timezone>Asia/Calcutta</timezone>
+    </developer>
+  </developers>
+  <properties>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+    	<maven.compiler.target>1.8</maven.compiler.target>
+    	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+  <dependencies>
+  	<dependency>
+    	<groupId>redis.clients</groupId>
+    	<artifactId>jedis</artifactId>
+    	<version>3.1.0</version>
+	</dependency>
+	<dependency>
+  		<groupId>junit</groupId>
+  		<artifactId>junit</artifactId>
+  		<version>4.12</version>
+  		<scope>test</scope>
+	</dependency>
+  	<dependency>
+  		<groupId>com.github.kstyrc</groupId>
+  		<artifactId>embedded-redis</artifactId>
+  		<version>0.6</version>
+	</dependency>  	
+  </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <minimizeJar>true</minimizeJar>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  
+</project>
