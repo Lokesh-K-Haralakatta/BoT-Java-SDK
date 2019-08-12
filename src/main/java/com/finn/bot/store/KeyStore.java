@@ -1,5 +1,4 @@
 package com.finn.bot.store;
-
 /*
 KeyStore.java - Class and Methods to handle the storage facility required for Java SDK using Redis
 Created by Lokesh H K, August 09, 2019.
@@ -21,10 +20,26 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import javax.imageio.ImageIO;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import com.google.gson.Gson;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import redis.clients.jedis.Jedis;
 
@@ -47,6 +62,7 @@ public class KeyStore {
 	
 	private static final String DEVICE_INFO_STORE = "deviceInfo"; // Key Store name in Redis for device specific info
 	private static final String DEVICE_ID = "deviceId"; // Key name for Device ID within deviceInfo
+	private static final String DEVICE_NAME = "deviceName"; // Key name for Device Name within deviceInfo
 	private static final String MAKER_ID = "makerId"; // Key name for Maker ID within deviceInfo
 	private static final String DEVICE_ALTERNATE_ID = "deviceAltId"; // Key name for Device Alternate ID
 			
@@ -60,6 +76,11 @@ public class KeyStore {
 	public static final int DEVICE_MULTIPAIR = 3; //value for DEVICE_STATE_MULTIPAIR
 	public static final int DEVICE_INVALID = 4; //value for INVALID
 	
+	private static final String QR_CODE_FLAG = "qrcodeGenerated"; // Flag to determine qrcode generation status
+	private static final String QR_CODE_KEY  = "qrCode"; // File name to store generated QRCode as PNG Image
+	private static final String QR_CODE_FILE_TYPE = "png"; // QRCode Image Type
+	private static final Integer QR_CODE_SIZE = 200; //QRCode Image Size
+	
 	//Make constructor as Private
 	private KeyStore(){
 		jedisClient = new Jedis();
@@ -68,6 +89,110 @@ public class KeyStore {
 	//Public method to return reference to single KeyStore instance always
 	public static KeyStore getKeyStoreInstance(){
 		return instance;
+	}
+	
+	//Method to return generated QRCode in bytes
+	public byte[] getQRCode(){
+		byte[] qrCodeBytes = null;
+		//Check QRCode generation status, if not generated, generate freshly
+		if(!isQRCodeGenerated()){
+			LOGGER.info("QRCode is not yet generated, generating now...");
+			try {
+				generateQRCode();
+				LOGGER.info("QRCode generated, QR_CODE_FLAG set to true");
+			}
+			catch(Exception e){
+				LOGGER.severe("Exception Caught while generating QRCode!!!");
+				LOGGER.severe(ExceptionUtils.getStackTrace(e));
+			}
+		}
+		
+		if(isQRCodeGenerated()){
+			LOGGER.info("QRCode generated, reading QRCode bytes to return");
+			qrCodeBytes = Base64.getDecoder().decode(jedisClient.get(QR_CODE_KEY));
+		}
+		return qrCodeBytes;
+	}
+	
+	//Method to generate QRCode and save it into Key Store
+	private void generateQRCode()throws WriterException, IOException {
+		if(!isQRCodeGenerated()){
+			// Create the ByteMatrix for the QR-Code that encodes the given String
+			Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<>();
+			hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+			QRCodeWriter qrCodeWriter = new QRCodeWriter();
+			BitMatrix byteMatrix = qrCodeWriter.encode(this.getDeviceInfo(), BarcodeFormat.QR_CODE, QR_CODE_SIZE, QR_CODE_SIZE, hintMap);
+			
+			// Make the BufferedImage that are to hold the QRCode
+			int matrixWidth = byteMatrix.getWidth();
+			BufferedImage image = new BufferedImage(matrixWidth, matrixWidth, BufferedImage.TYPE_INT_RGB);
+			image.createGraphics();
+
+			Graphics2D graphics = (Graphics2D) image.getGraphics();
+			graphics.setColor(Color.WHITE);
+			graphics.fillRect(0, 0, matrixWidth, matrixWidth);
+					
+			// Paint and save the image using the ByteMatrix
+			graphics.setColor(Color.BLACK);
+
+			for (int i = 0; i < matrixWidth; i++) {
+				for (int j = 0; j < matrixWidth; j++) {
+					if (byteMatrix.get(i, j))
+						graphics.fillRect(i, j, 1, 1);
+				}
+			}
+			
+			//Save QRCode PNG Image into Key Store
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ImageIO.write(image, QR_CODE_FILE_TYPE, bos);
+			jedisClient.set(QR_CODE_KEY, Base64.getEncoder().encodeToString(bos.toByteArray()));
+			jedisClient.set(QR_CODE_FLAG, "true");
+			
+			LOGGER.info("QRCode successfully generated and saved to KeyStore");
+		}
+	}
+	
+	//Method to check whether QR_CODE_FLAG initialized and set, returns true / false
+	public Boolean isQRCodeGenerated(){
+		LOGGER.info("Checking QRCode generated for the device or not");
+		if (jedisClient.exists(QR_CODE_FLAG)){
+			String qrcodeFlag = jedisClient.get(QR_CODE_FLAG);
+			if(qrcodeFlag != null && qrcodeFlag.equals("true")){
+				LOGGER.info("QRCode already generated and present in Key Store");
+				return true;
+			}
+			else{
+				LOGGER.warning("QR_CODE_FLAG exists in Redis but it's associated value is either NULL or FALSE");
+				return false;
+			}
+		}
+		else{
+			LOGGER.warning("QR_CODE_FLAG not exists in Redis");
+			return false;
+		}
+	}
+	
+	//Method to prepare and return DeviceInfo JSON Object in string format
+	public String getDeviceInfo(){
+		//Fill in DeviceInfo Instance
+		DeviceInfo deviceInfo = new DeviceInfo();
+		deviceInfo.setDeviceId(this.getDeviceId());
+		deviceInfo.setDeviceName(this.getDeviceName());
+		deviceInfo.setMakerID(this.getMakerId());
+		deviceInfo.setPublicKey(this.getKey(PUBLIC_KEY));
+		deviceInfo.setMultipair(0);
+		deviceInfo.setAlternateId(null);
+		if(this.getDeviceState() == KeyStore.DEVICE_MULTIPAIR){
+			deviceInfo.setMultipair(1);
+			deviceInfo.setAlternateId(this.getDeviceAltId());
+		}
+		
+		//Convert DeviceInfo Instance to JSON String
+		Gson gson = new Gson();
+		String jsonDeviceInfo = gson.toJson(deviceInfo);
+		LOGGER.info("Device Info in JSON String: " + jsonDeviceInfo);
+		
+		return jsonDeviceInfo;
 	}
 	
 	//Method to set device state based on the value provided
@@ -111,6 +236,16 @@ public class KeyStore {
 		return jedisClient.hget(DEVICE_INFO_STORE,DEVICE_ID);
 	}
 
+	//Method to set deviceName to given string in deviceInfo
+	public void setDeviceName(final String dName){
+		jedisClient.hset(DEVICE_INFO_STORE,DEVICE_NAME,dName);
+	}
+	
+	//Method to get deviceName from deviceInfo store
+	public String getDeviceName(){
+		return jedisClient.hget(DEVICE_INFO_STORE,DEVICE_NAME);
+	}
+	
 	//Method to set makerID to given string in deviceInfo
 	public void setMakerId(final String makerId){
 		jedisClient.hset(DEVICE_INFO_STORE,MAKER_ID,makerId);
@@ -131,22 +266,22 @@ public class KeyStore {
 		return jedisClient.hget(DEVICE_INFO_STORE,DEVICE_ALTERNATE_ID);
 	}
 	
-	//Method to return requested key contents as bytes retrieved from Redis keys store
-	public byte[] getKey(final String keyType){
-		byte[] keyBytes = null;
+	//Method to return requested key contents as String retrieved from keys store
+	public String getKey(final String keyType){
+		String key = null;
 		if (jedisClient.exists(KEYPAIR_FLAG)){
 			String keyPairFlag = jedisClient.get(KEYPAIR_FLAG);
 			if(keyPairFlag != null && keyPairFlag.equals("true")){
 				LOGGER.info("KeyPairs already generated and present in Key Store");
 				switch(keyType){
-				case API_KEY: keyBytes = jedisClient.hget(KEYPAIR_STORE, API_KEY).getBytes();
-                			  LOGGER.info("Length of API Key: " + keyBytes.length + " bytes");
+				case API_KEY: key = jedisClient.hget(KEYPAIR_STORE, API_KEY);
+                			  LOGGER.info("Length of API Key: " + key.length());
                 			  break;
-				case PRIVATE_KEY: keyBytes = jedisClient.hget(KEYPAIR_STORE, PRIVATE_KEY).getBytes();
-  			  					  LOGGER.info("Length of Private Key: " + keyBytes.length + " bytes");
+				case PRIVATE_KEY: key = jedisClient.hget(KEYPAIR_STORE, PRIVATE_KEY);
+  			  					  LOGGER.info("Length of Private Key: " + key.length());
   			  					  break;
-				case PUBLIC_KEY: keyBytes = jedisClient.hget(KEYPAIR_STORE, PUBLIC_KEY).getBytes();
-					  			 LOGGER.info("Length of Public Key: " + keyBytes.length + " bytes");
+				case PUBLIC_KEY: key = jedisClient.hget(KEYPAIR_STORE, PUBLIC_KEY);
+					  			 LOGGER.info("Length of Public Key: " + key.length());
 					  			 break;  			  					  
 				}	
 		    }
@@ -156,11 +291,11 @@ public class KeyStore {
 		else
 			LOGGER.warning("KeyPairs are not yet generated");
 		
-		return keyBytes;
+		return key;
 	}
 	
 	//Method to read Finn API Key Contents from file and return as bytes
-	public byte[] readApiKeyContents() throws IOException{
+	private byte[] readApiKeyContents() throws IOException{
 		byte[] apiKeyBytes = null;
 		LOGGER.info("Loading contents from " + API_KEY_FILE);
         InputStream in = getClass().getResourceAsStream(API_KEY_FILE);

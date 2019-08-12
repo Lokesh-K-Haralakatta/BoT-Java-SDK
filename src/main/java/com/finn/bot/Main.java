@@ -71,31 +71,28 @@ public class Main {
 	}
 	
 	private static void testGetKeys(){
-		byte[] apiKeyBytes = keyStore.getKey(KeyStore.API_KEY);
-		if(apiKeyBytes != null){
+		String key = keyStore.getKey(KeyStore.API_KEY);
+		if(key != null){
 			System.out.println("API Key Retrieved from Key Store:\n ====================== \n");
-			for (byte b : apiKeyBytes)
-		       System.out.print((char) b);
+			System.out.println(key);
 			System.out.println("\n ====================== \n");
 		}
 		else
 			System.out.println("Failed to get API Key Contents from Key Store");
 		
-		apiKeyBytes = keyStore.getKey(KeyStore.PRIVATE_KEY);
-		if(apiKeyBytes != null){
+		key = keyStore.getKey(KeyStore.PRIVATE_KEY);
+		if(key != null){
 			System.out.println("Private Key Retrieved from Key Store:\n ====================== \n");
-			for (byte b : apiKeyBytes)
-		       System.out.print((char) b);
+			System.out.println(key);
 			System.out.println("\n ====================== \n");
 		}
 		else
 			System.out.println("Failed to get Private Key Contents from Key Store");
 		
-		apiKeyBytes = keyStore.getKey(KeyStore.PUBLIC_KEY);
-		if(apiKeyBytes != null){
+		key = keyStore.getKey(KeyStore.PUBLIC_KEY);
+		if(key != null){
 			System.out.println("Public Key Retrieved from Key Store:\n ====================== \n");
-			for (byte b : apiKeyBytes)
-		       System.out.print((char) b);
+			System.out.println(key);
 			System.out.println("\n ====================== \n");
 		}
 		else
@@ -172,12 +169,24 @@ public class Main {
 		System.out.println("Device State Msg: " + keyStore.getDeviceState(state));		
 	}
 	
+	private static void testDeviceInfoJSON(){
+		String deviceInfoJson = keyStore.getDeviceInfo();
+		System.out.println("DeviceInfo: " + deviceInfoJson);
+	}
+	
+	private static void testQRCodeGenerationAndRetrieveal(){
+		byte[] qrCodeBytes = keyStore.getQRCode();
+		System.out.println("Number of bytes in QRCode: " +qrCodeBytes.length);
+	}
+	
 	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, IOException, InvalidKeySpecException {
 		//testActionsStore();
 		//testKeyPairsFunctionality();
 		//testGetKeys();
 		//testDeviceInfoStore();
-		testDeviceState();
+		//testDeviceState();
+		//testDeviceInfoJSON();
+		testQRCodeGenerationAndRetrieveal();
 	}
 
 }
