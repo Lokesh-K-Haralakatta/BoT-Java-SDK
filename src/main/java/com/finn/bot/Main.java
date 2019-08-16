@@ -7,16 +7,21 @@ Released into the repository BoT-Java-SDK.
 */
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Set;
 
+import com.finn.bot.core.BoTService;
 import com.finn.bot.store.ActionInfo;
 import com.finn.bot.store.KeyStore;
 
 public class Main {
     private static KeyStore keyStore = KeyStore.getKeyStoreInstance();
+    private static BoTService botService = BoTService.getBoTServiceInstance();
+    
 	private static void testActionsStore(){
 		KeyStore keyStore = KeyStore.getKeyStoreInstance();
 		ActionInfo action = new ActionInfo();
@@ -60,7 +65,7 @@ public class Main {
 		}
 	}
 	
-	private static void testKeyPairsFunctionality() throws NoSuchProviderException, NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+	private static void testKeyPairsFunctionality() throws NoSuchProviderException, NoSuchAlgorithmException, IOException, InvalidKeySpecException, CertificateException {
 		if(keyStore.isKeyPairGenerated()){
 			System.out.println("Key Pairs already generated and stored for the device");
 		}
@@ -179,14 +184,34 @@ public class Main {
 		System.out.println("Number of bytes in QRCode: " +qrCodeBytes.length);
 	}
 	
-	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+	private static void testBoTHTTPGet(){
+		try {
+			String response = botService.get("/pair");
+			System.out.print("Device Pair Status: " + response);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	private static void testEncodeDecodeJWT() throws CertificateException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, URISyntaxException{
+		String subject = "Finn Banking of Things";
+		String encodedToken = botService.encodeJWT(subject);
+		System.out.println("Encoded JWT Token: " +encodedToken);
+		String decodedText = botService.decodeJWT(encodedToken);
+		System.out.print("Decoded Text: " +decodedText);
+	}
+	
+	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, IOException, InvalidKeySpecException, CertificateException {
 		//testActionsStore();
 		//testKeyPairsFunctionality();
 		//testGetKeys();
 		//testDeviceInfoStore();
 		//testDeviceState();
 		//testDeviceInfoJSON();
-		testQRCodeGenerationAndRetrieveal();
+		//testQRCodeGenerationAndRetrieveal();
+		testBoTHTTPGet();
+		//testEncodeDecodeJWT();
 	}
 
 }

@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -295,18 +296,17 @@ public class KeyStore {
 	}
 	
 	//Method to read Finn API Key Contents from file and return as bytes
-	private byte[] readApiKeyContents() throws IOException{
+	private byte[] readApiKeyContents() throws IOException, CertificateException{
 		byte[] apiKeyBytes = null;
 		LOGGER.info("Loading contents from " + API_KEY_FILE);
         InputStream in = getClass().getResourceAsStream(API_KEY_FILE);
-        final int apiKeyBytesLength = in.available();
-        LOGGER.info("API Key Bytes Length: " + apiKeyBytesLength);
-        apiKeyBytes = new byte[apiKeyBytesLength];
-		in.read(apiKeyBytes);
+        final int apiBytesLength = in.available();
+        LOGGER.info("API Key Bytes Length: " + apiBytesLength);
+        apiKeyBytes = new byte[apiBytesLength];
+        in.read(apiKeyBytes);
         in.close();
-        LOGGER.info("API Key bytes loaded into apiKeyBytes array");
         
-		return apiKeyBytes;
+        return apiKeyBytes;
 	}
 	
 	//Method to check whether KEYPAIR_FLAG initialized and set, returns true / false
@@ -330,12 +330,12 @@ public class KeyStore {
 	}
 	
 	//Method to generate RSA Key Pairs of length 1024, gets API Key Contents and stores in Redis 
-	public void generateAndStoreKeyPair()throws NoSuchProviderException, NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+	public void generateAndStoreKeyPair()throws NoSuchProviderException, NoSuchAlgorithmException, IOException, InvalidKeySpecException, CertificateException {
 		if(!isKeyPairGenerated()){
 			LOGGER.info("Generating and Storing keyPairs for the device");
 			
 			KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-			kpg.initialize(2048);
+			kpg.initialize(1024);
 			KeyPair kp = kpg.generateKeyPair();
 			PrivateKey priv = kp.getPrivate();
 			PublicKey pub = kp.getPublic();
@@ -360,8 +360,8 @@ public class KeyStore {
 			keyPairMap.put(PRIVATE_KEY,Base64.getEncoder().encodeToString(pvtKey.getEncoded()));
 			keyPairMap.put(PUBLIC_KEY, Base64.getEncoder().encodeToString(pubKey.getEncoded()));
 			
+			//Retrieve Finn API Key Contents and save to key store
 			byte[] apiKeyBytes = readApiKeyContents();
-			LOGGER.info("API Key Bytes Length: " + apiKeyBytes.length);
 			keyPairMap.put(API_KEY, new String(apiKeyBytes));
 			
 			jedisClient.hset(KEYPAIR_STORE,keyPairMap);
