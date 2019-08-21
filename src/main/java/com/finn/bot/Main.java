@@ -8,6 +8,7 @@ Released into the repository BoT-Java-SDK.
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
@@ -71,7 +72,7 @@ public class Main {
 		}
 		else {
 			System.out.println("Key Pairs are not generated for the device, doing it now...");
-			keyStore.generateAndStoreKeyPair();
+			keyStore.generateAndStoreKeyPair(false);
 		}
 	}
 	
@@ -188,21 +189,31 @@ public class Main {
 		try {
 			String response = botService.get("/pair");
 			System.out.print("Device Pair Status: " + response);
+			response = botService.get("/actions");
+			System.out.println("Actions from Server: \n"+response+"\n");
 		}
 		catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 	
-	private static void testEncodeDecodeJWT() throws CertificateException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, URISyntaxException{
+	/*private static void testEncodeDecodeJWT() throws CertificateException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, URISyntaxException{
 		String subject = "Finn Banking of Things";
-		String encodedToken = botService.encodeJWT(subject);
+		String encodedToken = botService.signToken(subject);
 		System.out.println("Encoded JWT Token: " +encodedToken);
 		String decodedText = botService.decodeJWT(encodedToken);
 		System.out.print("Decoded Text: " +decodedText);
+	}*/
+	
+	private static void testBoTHttpPost() throws KeyManagementException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+		String actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
+		
+		System.out.println("Trigger action for " +actionId);
+		System.out.println("Response from HTTP Post Execution: " + botService.post("/actions", actionId));
 	}
 	
-	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, IOException, InvalidKeySpecException, CertificateException {
+	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, 
+	                   IOException, InvalidKeySpecException, CertificateException, KeyManagementException {
 		//testActionsStore();
 		//testKeyPairsFunctionality();
 		//testGetKeys();
@@ -210,8 +221,9 @@ public class Main {
 		//testDeviceState();
 		//testDeviceInfoJSON();
 		//testQRCodeGenerationAndRetrieveal();
-		testBoTHTTPGet();
 		//testEncodeDecodeJWT();
+		testBoTHTTPGet();
+		testBoTHttpPost();
 	}
 
 }
