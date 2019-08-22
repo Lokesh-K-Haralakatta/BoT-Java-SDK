@@ -185,7 +185,16 @@ public class Main {
 		System.out.println("Number of bytes in QRCode: " +qrCodeBytes.length);
 	}
 	
+	/*private static void testEncodeDecodeJWT() throws CertificateException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, URISyntaxException{
+		String subject = "Finn Banking of Things";
+		String encodedToken = botService.signToken(subject);
+		System.out.println("Encoded JWT Token: " +encodedToken);
+		String decodedText = botService.decodeJWT(encodedToken);
+		System.out.print("Decoded Text: " +decodedText);
+	}*/
+
 	private static void testBoTHTTPGet(){
+		//botService.setHTTPS(false);
 		try {
 			String response = botService.get("/pair");
 			System.out.print("Device Pair Status: " + response);
@@ -196,18 +205,10 @@ public class Main {
 			e.printStackTrace();
 		}
 	}
-	
-	/*private static void testEncodeDecodeJWT() throws CertificateException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, URISyntaxException{
-		String subject = "Finn Banking of Things";
-		String encodedToken = botService.signToken(subject);
-		System.out.println("Encoded JWT Token: " +encodedToken);
-		String decodedText = botService.decodeJWT(encodedToken);
-		System.out.print("Decoded Text: " +decodedText);
-	}*/
-	
+		
 	private static void testBoTHttpPost() throws KeyManagementException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
 		String actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
-		
+		//botService.setHTTPS(false);
 		System.out.println("Trigger action for " +actionId);
 		System.out.println("Response from HTTP Post Execution: " + botService.post("/actions", actionId));
 	}

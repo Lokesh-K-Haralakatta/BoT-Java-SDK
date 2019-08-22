@@ -9,9 +9,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyManagementException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -22,20 +26,21 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ResponseHandler;
+import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ManagedHttpClientConnection;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContexts;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
 
 import com.auth0.jwt.JWT;
@@ -62,10 +67,13 @@ public class BoTService {
 	//BoT Service related constants
 	private final static String HOST = "api-dev.bankingofthings.io";
 	private final static String URI = "/bot_iot";
-	private final static Integer HTTPS_PORT = 443;
+	
+	//Root CA SSL Finger Print Values
+	private final static String ROOT_CA_FP_SHA1 = "3ea22bbffb38a6769a30d6951bf0a9bb9a847dd6";
+	private final static String ROOT_CA_FP_SHA256 = "85763f1dfffde3791e52ce50776b7b50a15ae0f06a804819eca97ab22ce349b5";
 	
 	//Flag to enable or disable HTTP Secure Communication
-	private static Boolean https = false;
+	private static Boolean https = true;
 	
 	//Make constructor as Private
 	private BoTService() {}
@@ -93,9 +101,9 @@ public class BoTService {
 		String url = null;
 		
 		if(https)
-			url = "https://"+HOST+":"+HTTPS_PORT+URI+endPoint;
+			url = "https://"+HOST+URI+endPoint;
 		else 
-			url = "http://"+HOST+":"+URI+endPoint;
+			url = "http://"+HOST+URI+endPoint;
 			
 		return url;
 	}
@@ -105,32 +113,42 @@ public class BoTService {
 		CloseableHttpClient httpclient = null;
 		
 		if(https){
-			//Prepare SSL Context
-			SSLContext sslcontext = SSLContexts.custom().build();
-			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-															sslcontext,
-	                										new String[] { "TLSv1" , "TLSv2" },
-	                										null,
-	                										SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-			//Instantiate HTTP Client associated with SSL Context
-			httpclient = HttpClients.custom()
-	                				.setSSLSocketFactory(sslsf)
+			 // create http response certificate intercepter
+	        HttpResponseInterceptor certificateInterceptor = (httpResponse, context) -> {
+	            ManagedHttpClientConnection routedConnection = (ManagedHttpClientConnection)context.getAttribute(HttpCoreContext.HTTP_CONNECTION);
+	            SSLSession sslSession = routedConnection.getSSLSession();
+	            if (sslSession != null) {
+
+	                // get the server certificates from the SSLSession
+	                Certificate[] certificates = sslSession.getPeerCertificates();
+	                LOGGER.fine("Count of collected certificates from SSLSession: " +certificates.length);
+	                // add the certificates to the context, where we can later grab it from
+	                context.setAttribute("PEER_CERTIFICATES", certificates);
+	                LOGGER.fine("Added collected PEER_CERTIFICATES to context");
+	            }
+	        };
+
+	        // create closable http client and assign the certificate intercepter
+	        httpclient = HttpClients.custom()
+	                				.addInterceptorLast(certificateInterceptor)
 	                				.build();
-			LOGGER.fine("Instantiated HTTPClient instance with SSL Context");
+			
 		}
 		else {
 			//Instantiate default HTTP Client
 			httpclient = HttpClients.createDefault();
 			LOGGER.fine("Instantiated default HTTPClient instance");
 		}
-		
+
 		return httpclient;
 	}
 	
 	//Method to execute HTTP Get call on provided end point
 	public String get(final String endPoint) throws KeyManagementException, NoSuchAlgorithmException, 
 	                   IOException, CertificateException {
+		
 		String responseBody = null;
+		Boolean fingerPrintStatus = false;
 		
 		String completeURL = buildCompleteURL(endPoint);
 		LOGGER.fine("Constructed complete URL: " +completeURL);
@@ -140,44 +158,47 @@ public class BoTService {
 		try {
             HttpGet httpget = new HttpGet(completeURL);
 
-            LOGGER.fine("Executing request " + httpget.getRequestLine());
-
-            // Create a custom response handler
-            ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
-
-                @Override
-                public String handleResponse(
-                        final HttpResponse response) throws IOException {
-                    int status = response.getStatusLine().getStatusCode();
-                    HttpEntity entity = response.getEntity();
-                    LOGGER.fine("Handling GET Response for status code: " + status);
-                    if (status >= 200 && status < 300) {
-                    	LOGGER.fine("HTTP GET Succeeded with status code: "+status);
-                    	String decodedResponse = null;
-                    	try {
-                    		decodedResponse = entity != null ? decodeJWT(EntityUtils.toString(entity)):null;
-                    		LOGGER.fine("Decoded Response: " +decodedResponse);
-                    	}
-                    	catch(Exception e){
-                    		LOGGER.severe("Exception caught duirng decoding response from GET Call");
-                			LOGGER.severe(ExceptionUtils.getStackTrace(e));
-                    	}
-                        return  decodedResponse;
-                    } else {
-                    	LOGGER.severe("HTTP GET Failed with status code: "+status);
-                    	return entity != null ? EntityUtils.toString(entity) : null;
-                    }
-                }
-
-            };
-            
             //Add required HTTP headers
             httpget.addHeader("makerID", keyStore.getMakerId());
             httpget.addHeader("deviceID", keyStore.getDeviceId());
             
             //Execute HTTP GET
-            responseBody = httpclient.execute(httpget, responseHandler);
-            LOGGER.info("GET Response Body Contents: " + responseBody);
+            LOGGER.info("Executing request " + httpget.getRequestLine());
+            CloseableHttpResponse response = null;
+            if(https){
+            	// create http context where the certificate will be added
+                HttpContext context = new BasicHttpContext();
+                response = httpclient.execute(httpget,context);
+                fingerPrintStatus = verifyFingerPrint(context);
+                if(fingerPrintStatus)
+                	LOGGER.info("SSL Finger Print Verification Succeeded for HTTP GET");
+                else {
+                	LOGGER.severe("SSL Finger Print Verification Failed for HTTP GET");
+                	return("SSL Finger Print Verification Failed for HTTP GET");
+                }
+            }
+            else
+            	response = httpclient.execute(httpget);
+            
+          //Extract Response Contents
+            HttpEntity responseEntity = response.getEntity();
+            if(responseEntity != null){
+            	responseBody = EntityUtils.toString(responseEntity);
+            	LOGGER.fine("GET Response Body Contents: \n" +responseBody + "\n");
+            }
+            
+            //Check the response code and respond back
+            int statusCode = response.getStatusLine().getStatusCode();
+            if( statusCode == 200){
+            	LOGGER.info("HTTP GET Call Succeeded...");
+            	responseBody = decodeJWT(responseBody);
+            	LOGGER.fine("HTTP GET Call BoT Value: "+responseBody);
+            }
+            else {
+            	if(responseBody == null)
+            		responseBody = "HTTP GET Call with URL: " +completeURL+" Failed with StatusCode: " +statusCode;
+            	LOGGER.severe(responseBody);
+            }
             
         }
 		catch(Exception e){
@@ -191,10 +212,65 @@ public class BoTService {
 		return responseBody;
 	}
 	
+	//Method to verify the SSL Finger Print from the received Peer Certificate
+	private Boolean verifyFingerPrint(HttpContext context) throws CertificateEncodingException, NoSuchAlgorithmException{
+		Boolean status = false;
+		
+		// obtain the server certificates from the context
+        Certificate[] peerCertificates = (Certificate[])context.getAttribute("PEER_CERTIFICATES");
+
+        // loop over certificates and print meta-data
+        String fpSha1 = null;
+        String fpSha256 = null;
+        for (Certificate certificate : peerCertificates){
+            fpSha1 = getSSLFingerPrint((X509Certificate)certificate,"SHA-1");
+            fpSha256 = getSSLFingerPrint((X509Certificate)certificate,"SHA-256");
+            LOGGER.fine("SHA-1: "+fpSha1);
+            LOGGER.fine("SHA-256: "+fpSha256);
+            if(fpSha1.equals(ROOT_CA_FP_SHA1) && fpSha256.equals(ROOT_CA_FP_SHA256)){
+            	return true;
+            }
+        }
+        
+		return status;
+	}
+	
+	//Method extract requested Certificate ThumbPrint and return as Hex String
+    private String getSSLFingerPrint(final X509Certificate cert, final String mdType) 
+    		                        throws NoSuchAlgorithmException, CertificateEncodingException {
+    	String fingerPrint = null;
+    	     
+    	MessageDigest md = null;
+    	switch(mdType){
+    	  case "SHA-1" : md = MessageDigest.getInstance("SHA-1"); break;
+    	  case "SHA-256" : md = MessageDigest.getInstance("SHA-256"); break;
+    	  default: md = MessageDigest.getInstance("SHA-1"); break;
+    	}
+    	     
+    	byte[] der = cert.getEncoded();
+    	md.update(der);
+    	byte[] digest = md.digest();
+    	fingerPrint = bytesToHexString(digest);
+
+    	return fingerPrint;
+    }
+
+    //Method to convert bytes to Hex String
+    private String bytesToHexString(byte[] bytes){ 
+    	StringBuilder sb = new StringBuilder();
+    	
+    	for(byte b : bytes){ 
+    		sb.append(String.format("%02x", b&0xff)); 
+    	}
+    	return sb.toString(); 
+    } 
+    
 	//Method to execute HTTP Post call on provided end point
 	public String post(final String endPoint, final String actionId) throws NoSuchAlgorithmException, InvalidKeySpecException, KeyManagementException, IOException{
+		
 		String responseBody = null;
-
+		Boolean fingerPrintStatus = false;
+		
 		String completeURL = buildCompleteURL(endPoint);
 		LOGGER.fine("Constructed complete URL: " +completeURL);
 		
@@ -209,7 +285,7 @@ public class BoTService {
 			String signedToken = signPayload(actionId);
 			PostBodyItem body = new PostBodyItem(signedToken);
 			String bodyStr = jsonObject.toJson(body);
-			LOGGER.info("Prepared body contents for POST Call: "+bodyStr);
+			LOGGER.fine("Prepared body contents for POST Call: "+bodyStr);
 			StringEntity entity = new StringEntity(bodyStr);
 			httpPost.setEntity(entity);
 
@@ -219,8 +295,22 @@ public class BoTService {
             httpPost.addHeader("Content-Type", "application/json");
             
             //Execute HTTP POST
-            LOGGER.fine("Executing request " + httpPost.getRequestLine());
-            CloseableHttpResponse response = httpclient.execute(httpPost);
+            LOGGER.info("Executing request " + httpPost.getRequestLine());
+            CloseableHttpResponse response = null;
+            if(https){
+            	// create http context where the certificate will be added
+                HttpContext context = new BasicHttpContext();
+                response = httpclient.execute(httpPost,context);
+                fingerPrintStatus = verifyFingerPrint(context);
+                if(fingerPrintStatus)
+                	LOGGER.info("SSL Finger Print Verification Succeeded for HTTP POST");
+                else {
+                	LOGGER.severe("SSL Finger Print Verification Failed for HTTP POST");
+                	return ("SSL Finger Print Verification Failed for HTTP POST");
+                }
+            }
+            else
+            	response = httpclient.execute(httpPost);
             
             //Extract Response Contents
             HttpEntity responseEntity = response.getEntity();
@@ -234,7 +324,7 @@ public class BoTService {
             if( statusCode == 200){
             	LOGGER.info("HTTP POST Call Succeeded...");
             	responseBody = decodeJWT(responseBody);
-            	LOGGER.info("HTTP Post Call BoT Value: "+responseBody);
+            	LOGGER.fine("HTTP Post Call BoT Value: "+responseBody);
             }
             else {
             	if(responseBody == null)
