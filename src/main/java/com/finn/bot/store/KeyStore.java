@@ -201,7 +201,7 @@ public class KeyStore {
 	}
 	
 	//Method to set device state based on the value provided
-	public void setDeviceState(final int state){
+	public synchronized void setDeviceState(final int state){
 		switch(state){
 			case DEVICE_NEW: jedisClient.set(DEVICE_STATE_KEY,Integer.toString(DEVICE_NEW)); break;
 			case DEVICE_PAIRED: jedisClient.set(DEVICE_STATE_KEY,Integer.toString(DEVICE_PAIRED)); break;
@@ -232,7 +232,7 @@ public class KeyStore {
 	}
 	
 	//Method to set deviceID to given string in deviceInfo
-	public void setDeviceId(final String deviceId){
+	public synchronized void setDeviceId(final String deviceId){
 		jedisClient.hset(DEVICE_INFO_STORE,DEVICE_ID,deviceId);
 	}
 	
@@ -242,7 +242,7 @@ public class KeyStore {
 	}
 
 	//Method to set deviceName to given string in deviceInfo
-	public void setDeviceName(final String dName){
+	public synchronized void setDeviceName(final String dName){
 		jedisClient.hset(DEVICE_INFO_STORE,DEVICE_NAME,dName);
 	}
 	
@@ -252,7 +252,7 @@ public class KeyStore {
 	}
 	
 	//Method to set makerID to given string in deviceInfo
-	public void setMakerId(final String makerId){
+	public synchronized void setMakerId(final String makerId){
 		jedisClient.hset(DEVICE_INFO_STORE,MAKER_ID,makerId);
 	}
 	
@@ -262,7 +262,7 @@ public class KeyStore {
 	}
 
 	//Method to set deviceAletrnateID to given string in deviceInfo
-	public void setDeviceAltId(final String deviceAltId){
+	public synchronized void setDeviceAltId(final String deviceAltId){
 		jedisClient.hset(DEVICE_INFO_STORE,DEVICE_ALTERNATE_ID,deviceAltId);
 	}
 	

@@ -16,12 +16,14 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Set;
 
 import com.finn.bot.core.BoTService;
+import com.finn.bot.pair.PairingService;
 import com.finn.bot.store.ActionInfo;
 import com.finn.bot.store.KeyStore;
 
 public class Main {
     private static KeyStore keyStore = KeyStore.getKeyStoreInstance();
     private static BoTService botService = BoTService.getBoTServiceInstance();
+    private static PairingService pairService = PairingService.getPairingServiceInstance();
     
 	private static void testActionsStore(){
 		KeyStore keyStore = KeyStore.getKeyStoreInstance();
@@ -72,7 +74,7 @@ public class Main {
 		}
 		else {
 			System.out.println("Key Pairs are not generated for the device, doing it now...");
-			keyStore.generateAndStoreKeyPair(false);
+			keyStore.generateAndStoreKeyPair(true);
 		}
 	}
 	
@@ -213,8 +215,12 @@ public class Main {
 		System.out.println("Response from HTTP Post Execution: " + botService.post("/actions", actionId));
 	}
 	
+	private static void testDevicePairing() throws InterruptedException{
+		pairService.pairDeviceWithBoTService();
+	}
+	
 	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, 
-	                   IOException, InvalidKeySpecException, CertificateException, KeyManagementException {
+	                   IOException, InvalidKeySpecException, CertificateException, KeyManagementException, InterruptedException {
 		//testActionsStore();
 		//testKeyPairsFunctionality();
 		//testGetKeys();
@@ -223,8 +229,9 @@ public class Main {
 		//testDeviceInfoJSON();
 		//testQRCodeGenerationAndRetrieveal();
 		//testEncodeDecodeJWT();
-		testBoTHTTPGet();
-		testBoTHttpPost();
+		//testBoTHTTPGet();
+		//testBoTHttpPost();
+		testDevicePairing();
 	}
 
 }
