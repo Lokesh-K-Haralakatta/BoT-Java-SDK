@@ -1,4 +1,4 @@
-package com.finn.bot.pair;
+package com.finn.bot.service;
 /*
 PairingService.java - Class and Methods to check device pairing status with the help of underlying BoT Service
 Created by Lokesh H K, August 26, 2019.
@@ -69,32 +69,34 @@ public class PairingService {
 		return pairingStatus;
 	}
 	
-	//Method to check whether the device can be pair able or not
-	//Poll the pairing status max number of tries from BoT Service and
-	//Set Device state to paired and pass on the control to activate the device
-	public void pairDeviceWithBoTService() throws InterruptedException{
-		if(this.isDevicePairable() == false)
-			return;
-		
-		if(this.isDeviceMaultipair())
-			return;
-		
+	//Method to poll pairing status from Back End Service from Max number of tries 
+	private Boolean pollPairingStatus() throws InterruptedException{
 		int tries = 0;
-		Boolean devicePaired = false;
 		do {
 			tries++;
 			LOGGER.info("Polling Device Pair Status - Attempt#" + tries + " ...");
 			if(isDevicePaired()) {
-				devicePaired = true;
-				break;
+				return true;
 			}
 			Thread.sleep(PairingService.POLLING_INTERVAL_IN_MILLISECONDS);
 		}while(tries < PairingService.MAXIMUM_TRIES);
+		LOGGER.warning("Device not paired in max attempts# "+tries+" , try again!!!");
+		return false;
+	}
 		
-		if(devicePaired){
+	//Method to check whether the device can be pair able or not
+	//Poll the pairing status max number of tries from BoT Service and
+	//Set Device state to paired and pass on the control to activate the device
+	public synchronized void pairDevice() throws InterruptedException{
+		if(!this.isDevicePairable() || this.isDeviceMaultipair()){
+			LOGGER.warning("Device is already paired and activated OR Device is Multipair");
+			return;
+		}
+		
+		if(pollPairingStatus()){
 			keyStore.setDeviceState(KeyStore.DEVICE_PAIRED);
 			LOGGER.info("Device successfully paired, Activating Device ...");
-			//Call ActivationService.activateDevice Method
+			ActivationService.getActivationServiceInstance().activateDevice();
 		}
 		else {
 			LOGGER.warning("Device Not Paired with in given max number tries");

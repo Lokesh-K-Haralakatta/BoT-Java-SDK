@@ -7,7 +7,6 @@ Released into the repository BoT-Java-SDK.
 */
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -16,7 +15,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Set;
 
 import com.finn.bot.core.BoTService;
-import com.finn.bot.pair.PairingService;
+import com.finn.bot.service.ActivationService;
+import com.finn.bot.service.PairingService;
 import com.finn.bot.store.ActionInfo;
 import com.finn.bot.store.KeyStore;
 
@@ -24,6 +24,7 @@ public class Main {
     private static KeyStore keyStore = KeyStore.getKeyStoreInstance();
     private static BoTService botService = BoTService.getBoTServiceInstance();
     private static PairingService pairService = PairingService.getPairingServiceInstance();
+    private static ActivationService activationService = ActivationService.getActivationServiceInstance();
     
 	private static void testActionsStore(){
 		KeyStore keyStore = KeyStore.getKeyStoreInstance();
@@ -216,7 +217,11 @@ public class Main {
 	}
 	
 	private static void testDevicePairing() throws InterruptedException{
-		pairService.pairDeviceWithBoTService();
+		pairService.pairDevice();
+	}
+	
+	private static void testDeviceActivation() throws InterruptedException{
+		activationService.activateDevice();
 	}
 	
 	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, 
@@ -231,7 +236,8 @@ public class Main {
 		//testEncodeDecodeJWT();
 		//testBoTHTTPGet();
 		//testBoTHttpPost();
-		testDevicePairing();
+		//testDevicePairing();
+		testDeviceActivation();
 	}
 
 }

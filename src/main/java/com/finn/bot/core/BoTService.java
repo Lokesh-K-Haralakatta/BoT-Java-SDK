@@ -144,7 +144,7 @@ public class BoTService {
 	}
 	
 	//Method to execute HTTP Get call on provided end point
-	public String get(final String endPoint) throws KeyManagementException, NoSuchAlgorithmException, 
+	public synchronized String get(final String endPoint) throws KeyManagementException, NoSuchAlgorithmException, 
 	                   IOException, CertificateException {
 		
 		String responseBody = null;
@@ -197,6 +197,10 @@ public class BoTService {
             else {
             	if(responseBody == null)
             		responseBody = "HTTP GET Call with URL: " +completeURL+" Failed with StatusCode: " +statusCode;
+            	else{
+            		responseBody = "HTTP GET Call with URL: " +completeURL+" Failed with StatusCode: " 
+            	                     +statusCode + " with response: " +decodeJWT(responseBody);
+            	}	
             	LOGGER.severe(responseBody);
             }
             
@@ -266,7 +270,7 @@ public class BoTService {
     } 
     
 	//Method to execute HTTP Post call on provided end point
-	public String post(final String endPoint, final String actionId) throws NoSuchAlgorithmException, InvalidKeySpecException, KeyManagementException, IOException{
+	public synchronized String post(final String endPoint, final String actionId) throws NoSuchAlgorithmException, InvalidKeySpecException, KeyManagementException, IOException{
 		
 		String responseBody = null;
 		Boolean fingerPrintStatus = false;
