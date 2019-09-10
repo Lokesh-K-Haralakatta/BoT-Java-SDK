@@ -9,12 +9,20 @@ public class JWTItems extends Object{
 	private String actionID;
 	private String deviceID;
 	private String queueID;
+	private String alternativeID;
 	
 	public JWTItems(final String actID, final String devID, final String qID){
 		this.actionID = actID;
 		this.deviceID = devID;
 		this.queueID = qID;
 	}
+	
+	public JWTItems(final String actID, final String devID, final String qID, final String altID){
+		this.actionID = actID;
+		this.deviceID = devID;
+		this.queueID = qID;
+		this.alternativeID = altID;
+	}	
 	
 	public String getActionID(){
 		return this.actionID;
@@ -27,4 +35,8 @@ public class JWTItems extends Object{
 	public String getQueueID(){
 		return this.queueID;
 	}
+	
+	public String getAlternativeID(){
+		return this.alternativeID;
+	}	
 }

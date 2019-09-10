@@ -333,11 +333,15 @@ public class BoTService {
             else {
             	if(responseBody == null)
             		responseBody = "HTTP POST Call with URL: " +completeURL+" Failed with StatusCode: " +statusCode;
+            	else{
+            		responseBody = "HTTP POST Call with URL: " +completeURL+" Failed with StatusCode: " 
+            	                     +statusCode + " with response: " +decodeJWT(responseBody);
+            	}	
             	LOGGER.severe(responseBody);
             }
 		}
 		catch(Exception e){
-			LOGGER.severe("Exception caught duirng performing POST Call with BoT Service");
+			LOGGER.severe("Exception caught during performing POST Call with BoT Service");
 			LOGGER.severe(ExceptionUtils.getStackTrace(e));			
 		}
 		finally {
@@ -374,10 +378,15 @@ public class BoTService {
 			
 			// Prepare JWT Data
 			Map<String,JWTItems> payloadHash = new HashMap<String,JWTItems>();
-			JWTItems items = new JWTItems(actionId,keyStore.getDeviceId(),keyStore.generateUUID4());
+			JWTItems items = null;
+			if(keyStore.getDeviceState() == KeyStore.DEVICE_MULTIPAIR)
+				items = new JWTItems(actionId,keyStore.getDeviceId(),keyStore.generateUUID4(), keyStore.getDeviceAltId());
+			else
+				items = new JWTItems(actionId,keyStore.getDeviceId(),keyStore.generateUUID4());
+			
 			payloadHash.put("bot", items);
 			String payloadStr = jsonObject.toJson(payloadHash);
-			LOGGER.fine("JWT Data String: "+payloadStr);
+			LOGGER.info("Payload Data String: "+payloadStr);
 			
 			// Encode JWT Header and JWT Data in Base64
 			String encHeader = Base64.getEncoder().encodeToString(jwtHdrStr.getBytes(StandardCharsets.UTF_8));

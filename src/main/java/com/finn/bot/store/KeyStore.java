@@ -58,6 +58,7 @@ public class KeyStore {
 	
 	//Define required final constants at class level
 	private static final String ACTION_STORE_PREFIX = "action#"; // Used as prefix with action store
+	private static final String ACTIONS_STORE = "actions"; // Store to save retrieved actions from server
 	private static final String KEYPAIR_FLAG = "keysGenerated"; // Flag to determine keys generation status
 	private static final String KEYPAIR_STORE = "keysStore"; // Key Store name in Redis for all keys
 	private static final String PRIVATE_KEY_FILE = "/private-pkcs8.der"; // Private Key File in PKCS8 format
@@ -397,6 +398,16 @@ public class KeyStore {
 	//Method to generate and return UUID4 as String
 	public String generateUUID4(){
 		return UUID.randomUUID().toString();
+	}
+	
+	//Method to save actions given as string into Actions Store
+	public void saveActions(final String actions){
+		jedisClient.set(ACTIONS_STORE, actions);
+	}
+	
+	//Method to return actions saved in Actions Store as String
+	public String getActions(){
+		return jedisClient.get(ACTIONS_STORE);
 	}
 	
 	//Method to store given action into Redis actions store

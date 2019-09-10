@@ -12,11 +12,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.List;
 import java.util.Set;
 
 import com.finn.bot.core.BoTService;
+import com.finn.bot.service.ActionService;
 import com.finn.bot.service.ActivationService;
 import com.finn.bot.service.PairingService;
+import com.finn.bot.store.ActionDTO;
 import com.finn.bot.store.ActionInfo;
 import com.finn.bot.store.KeyStore;
 
@@ -25,6 +28,7 @@ public class Main {
     private static BoTService botService = BoTService.getBoTServiceInstance();
     private static PairingService pairService = PairingService.getPairingServiceInstance();
     private static ActivationService activationService = ActivationService.getActivationServiceInstance();
+    private static ActionService actionService = ActionService.getActionServiceInstance();
     
 	private static void testActionsStore(){
 		KeyStore keyStore = KeyStore.getKeyStoreInstance();
@@ -224,6 +228,19 @@ public class Main {
 		activationService.activateDevice();
 	}
 	
+	private static void testGetActions(){
+	   List<ActionDTO> actions = actionService.getActions();
+	   System.out.println("Number of Actions Retrieved: " + actions.size());
+	   for(ActionDTO action:actions){
+		   System.out.println(action.getActionID()+":"+action.getActionName()+":"+action.getFrequency());
+	   }
+	}
+	
+	private static void testPostAction(){
+		String actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
+		System.out.println("Response from postAction: " +actionService.postAction(actionId));
+	}
+	
 	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, 
 	                   IOException, InvalidKeySpecException, CertificateException, KeyManagementException, InterruptedException {
 		//testActionsStore();
@@ -237,7 +254,9 @@ public class Main {
 		//testBoTHTTPGet();
 		//testBoTHttpPost();
 		//testDevicePairing();
-		testDeviceActivation();
+		//testDeviceActivation();
+		//testGetActions();
+		testPostAction();
 	}
 
 }
