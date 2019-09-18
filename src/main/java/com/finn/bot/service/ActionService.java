@@ -8,11 +8,13 @@ Released into the repository BoT-Java-SDK.
 import java.util.List;
 import java.util.logging.Logger;
 import java.lang.reflect.Type;
+import java.time.Instant;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.finn.bot.core.BoTService;
 import com.finn.bot.store.ActionDTO;
+import com.finn.bot.store.ActionInfo;
 import com.finn.bot.store.KeyStore;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -77,7 +79,7 @@ public class ActionService {
 	}
 	
 	//Method to initiate action with the back end server and return the response
-	public synchronized String postAction(final String actionID){
+	private synchronized String postAction(final String actionID){
 		if(actionID == null){
 			LOGGER.warning("ActionID can not be NULL");
 			return null;
@@ -92,4 +94,80 @@ public class ActionService {
 			return null;
 		}	
 	}
+	
+	//Method for end user to trigger an action
+	public String triggerAction(final String actionID){
+		if(actionID == null){
+			LOGGER.warning("ActionID can not be NULL");
+			return null;
+		}
+		else if(!isActionValid(actionID)){
+			LOGGER.warning("Invalid ActionID - " +actionID);
+			return null;
+			
+		}
+		else {
+			Instant triggerTime = Instant.now();
+			String triggerResponse = postAction(actionID);
+			if(triggerResponse != null && !triggerResponse.contains("Not-OK") && triggerResponse.contains("OK")){
+				LOGGER.fine("Action trigger successful for " + actionID + " , saving trigger time...");
+				ActionInfo action = new ActionInfo(actionID,Long.toString(triggerTime.getEpochSecond()));
+				keyStore.storeAction(action);
+				LOGGER.fine("Trigger Time saved for action - " +actionID+ " : "+triggerTime.toString());
+			}
+			return triggerResponse;
+		}
+	}
+	
+	//Method to validate the provided action 
+	private Boolean isActionValid(final String actionID){
+		List<ActionDTO> actions = getActions();
+		if(isActionPresent(actions,actionID) && isValidActionFrequency(actions,actionID)){
+			return true;
+		}
+		else {
+			LOGGER.warning("Given actionID: "+actionID+" - Not present in retrieved actions OR "
+					+ "Action Frequency is not valid");
+			return false;
+		}	
+	}
+	
+	//Method to check and confirm the given action is present in actions list or not
+	private Boolean isActionPresent(final List<ActionDTO> actions, final String actionID){
+		for(ActionDTO action : actions)
+			if(action.getActionID().equalsIgnoreCase(actionID))
+				return true;
+		
+		return false;
+	}
+	
+	//Method to check and confirm the frequency associated with the action is correct
+	private Boolean isValidActionFrequency(final List<ActionDTO> actions, final String actionID){
+		for(ActionDTO action : actions)
+			if(action.getActionID().equalsIgnoreCase(actionID)){
+				ActionInfo savedAction = keyStore.getAction(actionID);
+				Instant triggerTime = Instant.now();
+				Long lastTriggerTimeInSeconds = null;
+				if(savedAction != null){
+					lastTriggerTimeInSeconds = Long.parseLong(savedAction.getLastTriggerTime());
+					long elapsedSeconds = triggerTime.getEpochSecond() - lastTriggerTimeInSeconds;
+					LOGGER.fine("Action Frequency for " + actionID + " : " + action.getFrequency());
+					LOGGER.fine("Number of seconds since from last trigger for action - " + actionID + " : "+elapsedSeconds);
+					switch(action.getFrequency()){
+						case "always" : return true;
+						case "minutely": return elapsedSeconds > 60;
+						case "hourly": return elapsedSeconds > 60*60;
+						case "daily": return elapsedSeconds > 24*60*60;
+						case "weekly": return elapsedSeconds > 7*24*60*60;
+						case "monthly": return elapsedSeconds > 28*24*60*60;
+						case "half_yearly": return elapsedSeconds > 6*28*24*60*60;
+						case "yearly": return elapsedSeconds > 12*28*24*60*60;
+						default: return false;
+					}
+				}
+				else
+					return true;
+			}
+		return false;
+	}	
 }

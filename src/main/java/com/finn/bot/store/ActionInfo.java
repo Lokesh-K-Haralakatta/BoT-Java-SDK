@@ -8,14 +8,12 @@ Released into the repository BoT-Java-SDK.
 
 public class ActionInfo {
 	private String actionId;
-	private String frequency;
 	private String lastTriggerTime;
 	
 	public ActionInfo(){}
 	
-	public ActionInfo(final String id, final String freq, final String ltt){
+	public ActionInfo(final String id, final String ltt){
 		actionId = id;
-		frequency = freq;
 		lastTriggerTime = ltt;
 	}
 	
@@ -25,14 +23,6 @@ public class ActionInfo {
 	
 	public void setActionId(final String id){
 		actionId = id;
-	}
-	
-	public String getFrequency(){
-		return frequency;
-	}
-	
-	public void setFrequency(final String freq){
-		frequency = freq;
 	}
 	
 	public String getLastTriggerTime(){

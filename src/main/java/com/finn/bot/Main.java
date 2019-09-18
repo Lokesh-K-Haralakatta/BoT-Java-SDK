@@ -36,23 +36,20 @@ public class Main {
 		
 		String actionId = keyStore.generateUUID4();
 		action.setActionId(actionId);
-		action.setFrequency("Minutely");
 		action.setLastTriggerTime(""+12345678);
 		keyStore.storeAction(action);
 		
 		action.setActionId(keyStore.generateUUID4());
-		action.setFrequency("Hourly");
 		action.setLastTriggerTime(""+12345678);
 		keyStore.storeAction(action);
 		
 		action.setActionId(keyStore.generateUUID4());
-		action.setFrequency("Daily");
 		action.setLastTriggerTime(""+12345678);
 		keyStore.storeAction(action);
 		System.out.println("Total 3 actions placed into Store");
 		
 		action = keyStore.getAction(actionId);
-		System.out.println("Action ID: " + action.getActionId() + "\nAction Frequency: " + action.getFrequency());
+		System.out.println("Action ID: " + action.getActionId() + "\nAction ltt: " + action.getLastTriggerTime());
 		
 		action = keyStore.getAction(null);
 		if(action != null)
@@ -69,7 +66,7 @@ public class Main {
 		Set<ActionInfo> allActions = keyStore.getAllActions();
 		System.out.println("Total actions in Store: " +allActions.size());
 		for(ActionInfo actionItem : allActions){
-			System.out.println("Action ID: " + actionItem.getActionId() + "\nAction Frequency: " + actionItem.getFrequency());
+			System.out.println("Action ID: " + actionItem.getActionId() + "\nAction ltt: " + actionItem.getLastTriggerTime());
 		}
 	}
 	
@@ -236,9 +233,37 @@ public class Main {
 	   }
 	}
 	
-	private static void testPostAction(){
-		String actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
-		System.out.println("Response from postAction: " +actionService.postAction(actionId));
+	private static void testTriggerAction(){
+		//Set deviceID to eb25d0ba-2dcd-4db2-8f96-a4fbe54dbffc since all actions are added as services
+		keyStore.setDeviceId("eb25d0ba-2dcd-4db2-8f96-a4fbe54dbffc");
+		keyStore.setDeviceState(KeyStore.DEVICE_ACTIVE);
+		
+		String actionId = "E6509B49-5048-4151-B965-BB7B2DBC7905";
+		System.out.println("Response from postAction for always valid action: " +actionService.triggerAction(actionId));
+
+		actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
+		System.out.println("Response from postAction for minutely action: " +actionService.triggerAction(actionId));
+
+		actionId = "749081B8-664D-4A15-908E-1C3F6590930D";
+		System.out.println("Response from postAction for hourly action: " +actionService.triggerAction(actionId));
+
+		actionId = "81F6011A-9AF0-45AE-91CD-9A0CDA81FA1F";
+		System.out.println("Response from postAction for daily action: " +actionService.triggerAction(actionId));
+
+		actionId = "0BF5E8D2-9062-467E-BB19-88CB76D06F8E";
+		System.out.println("Response from postAction for weekly action: " +actionService.triggerAction(actionId));
+		
+		actionId = "C257DB70-AE57-4409-B94E-678CB1567FA6";
+		System.out.println("Response from postAction for monthly action: " +actionService.triggerAction(actionId));
+		
+		actionId = "D93F99E1-011B-4609-B04E-AEDBA98A7C5F";
+		System.out.println("Response from postAction for half-yearly action: " +actionService.triggerAction(actionId));
+		
+		actionId = "0097430C-FA78-4087-9B78-3AC7FEEF2245";
+		System.out.println("Response from postAction for yearly action: " +actionService.triggerAction(actionId));
+		
+		actionId = "A42ABD19-3226-47AB-8045-8129DBDF117F";
+		System.out.println("Response from postAction for invalid action: " +actionService.triggerAction(actionId));
 	}
 	
 	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, 
@@ -256,7 +281,7 @@ public class Main {
 		//testDevicePairing();
 		//testDeviceActivation();
 		//testGetActions();
-		testPostAction();
+		testTriggerAction();
 	}
 
 }

@@ -418,7 +418,6 @@ public class KeyStore {
 			final String KEY = ACTION_STORE_PREFIX+actionId;
 			Map<String,String> actionMap = new HashMap<String,String>();
 			actionMap.put("actionId", actionId);
-			actionMap.put("frequency", action.getFrequency());
 			actionMap.put("ltt", action.getLastTriggerTime());
 			result = jedisClient.hset(KEY,actionMap);
 			LOGGER.fine("Added action with id - " + actionId + " to Actions Store");
@@ -434,7 +433,7 @@ public class KeyStore {
 		ActionInfo action = null;
 		if(actionMap.size() > 0){
 			LOGGER.fine("Retrieved action with id - " + actionId + " from Actions Store");
-			action = new ActionInfo(actionMap.get("actionId"),actionMap.get("frequency"),actionMap.get("ltt"));
+			action = new ActionInfo(actionMap.get("actionId"),actionMap.get("ltt"));
 		}
 		return action;
 	}
