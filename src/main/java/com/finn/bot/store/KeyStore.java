@@ -121,7 +121,7 @@ public class KeyStore {
 	}
 	
 	//Method to generate QRCode and save it into Key Store
-	private void generateQRCode()throws WriterException, IOException {
+	public void generateQRCode()throws WriterException, IOException {
 		if(!isQRCodeGenerated()){
 			// Create the ByteMatrix for the QR-Code that encodes the given String
 			Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<>();
@@ -176,6 +176,12 @@ public class KeyStore {
 			LOGGER.warning("QR_CODE_FLAG not exists in Redis");
 			return false;
 		}
+	}
+	
+	//Method to clear generated QrCode
+	public void clearQrCode(){
+		jedisClient.set(QR_CODE_FLAG,"false");
+		jedisClient.set(QR_CODE_KEY,"");
 	}
 	
 	//Method to prepare and return DeviceInfo JSON Object in string format
@@ -393,6 +399,15 @@ public class KeyStore {
 			
 			LOGGER.info("keyPairs generated and stored, KEYPAIR_FLAG set to true for the device");
 		}
+	}
+	
+	//Method to clear generated QrCode
+	public void clearKeyPair(){
+		jedisClient.set(KEYPAIR_FLAG,"false");
+		Map<String,String> keyPairMap = new HashMap<String,String>();
+		keyPairMap.put(PRIVATE_KEY,"");
+		keyPairMap.put(PUBLIC_KEY, "");
+		jedisClient.hset(KEYPAIR_STORE,keyPairMap);
 	}
 	
 	//Method to generate and return UUID4 as String
