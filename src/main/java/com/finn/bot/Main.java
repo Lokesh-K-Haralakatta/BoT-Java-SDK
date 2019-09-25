@@ -1,5 +1,4 @@
 package com.finn.bot;
-
 /*
 Main.java - Testing Java SDK various classes methods as Integration tests
 Created by Lokesh H K, August 09, 2019.
@@ -18,6 +17,7 @@ import java.util.Set;
 import com.finn.bot.core.BoTService;
 import com.finn.bot.service.ActionService;
 import com.finn.bot.service.ActivationService;
+import com.finn.bot.service.BLEService;
 import com.finn.bot.service.ConfigurationService;
 import com.finn.bot.service.PairingService;
 import com.finn.bot.store.ActionDTO;
@@ -32,6 +32,7 @@ public class Main {
     private static ActivationService activationService = ActivationService.getActivationServiceInstance();
     private static ActionService actionService = ActionService.getActionServiceInstance();
     private static ConfigurationService configService = ConfigurationService.getConfigurationServiceInstance();
+    private static BLEService bleService = BLEService.getBLEServiceInstance();
     
 	private static void testActionsStore(){
 		KeyStore keyStore = KeyStore.getKeyStoreInstance();
@@ -344,8 +345,74 @@ public class Main {
 		System.out.println("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));		
 	}
 	
+	private static void testBlenoService() throws IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, WriterException, InterruptedException{
+		//Reset existing device configuration
+		configService.resetDeviceConfiguration(true,true);
+		System.out.println("Device Configuration after reseting existing configuration: ");
+		System.out.println("MakerID: "+keyStore.getMakerId());
+		System.out.println("DeviceID: "+keyStore.getDeviceId());
+		System.out.println("DeviceName: "+keyStore.getDeviceName());
+		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		System.out.println("KeyPair Exists: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		System.out.println("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
+		
+		//Initialize device with new deviceID and single pair
+		configService.initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", null, true, false, null);
+		System.out.println("Device Configuration after initializing for Single Pair: ");
+		System.out.println("MakerID: "+keyStore.getMakerId());
+		System.out.println("DeviceID: "+keyStore.getDeviceId());
+		System.out.println("DeviceName: "+keyStore.getDeviceName());
+		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		System.out.println("KeyPair Generated: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		System.out.println("QrCode Generated: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
+		
+		//Call executeBLENOService method to start bleno-service.js
+		bleService.executeBLENOService();
+	}
+
+	private static void testBlenoServiceMultiPair() throws IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, WriterException, InterruptedException{
+		//Reset existing device configuration
+		configService.resetDeviceConfiguration(true,true);
+		System.out.println("Device Configuration after reseting existing configuration: ");
+		System.out.println("MakerID: "+keyStore.getMakerId());
+		System.out.println("DeviceID: "+keyStore.getDeviceId());
+		System.out.println("DeviceName: "+keyStore.getDeviceName());
+		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		System.out.println("KeyPair Exists: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		System.out.println("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
+		
+		//Initialize device with new deviceID and multi pair
+		configService.initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", null, true, true, "RPI-Java-MLP");
+		System.out.println("Device Configuration after initializing for Single Pair: ");
+		System.out.println("MakerID: "+keyStore.getMakerId());
+		System.out.println("DeviceID: "+keyStore.getDeviceId());
+		System.out.println("DeviceName: "+keyStore.getDeviceName());
+		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		System.out.println("KeyPair Generated: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		System.out.println("QrCode Generated: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
+		
+		//Call executeBLENOService method to start bleno-service.js
+		bleService.executeBLENOService();
+	}
+	
+	private static void testBlenoServiceWithPairedDevice() throws InterruptedException{
+		//Set Device ID to already paired device id
+		keyStore.setDeviceId("eb25d0ba-2dcd-4db2-8f96-a4fbe54dbffc");
+		
+		//Call executeBLENOService method to start bleno-service.js
+		bleService.executeBLENOService();
+	}
+	
 	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, 
 	                   IOException, InvalidKeySpecException, CertificateException, KeyManagementException, InterruptedException, WriterException {
+		
+		//Command to execute the main method
+		//java -Dbleno.service.path=/home/pi -cp BoT-Java-SDK-0.0.1-SNAPSHOT.jar com.finn.bot.Main
+		
 		//testActionsStore();
 		//testKeyPairsFunctionality();
 		//testGetKeys();
@@ -360,7 +427,10 @@ public class Main {
 		//testDeviceActivation();
 		//testGetActions();
 		//testTriggerAction();
-		testDeviceConfiguration();
+		//testDeviceConfiguration();
+		//testBlenoService();
+		//testBlenoServiceMultiPair();
+		testBlenoServiceWithPairedDevice();
 	}
 
 }

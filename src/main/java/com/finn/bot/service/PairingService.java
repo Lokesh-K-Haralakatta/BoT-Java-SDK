@@ -54,7 +54,7 @@ public class PairingService {
 	}
 	
 	//Method to check whether the device has pair status as true or not with BoT Service
-	private Boolean isDevicePaired(){
+	public Boolean isDevicePaired(){
 		Boolean pairingStatus = false;
 		try {
 				String response = bot.get(PairingService.BoT_EndPoint);
