@@ -25,7 +25,7 @@ import com.finn.bot.store.ActionInfo;
 import com.finn.bot.store.KeyStore;
 import com.google.zxing.WriterException;
 
-public class Main {
+public class IntegrationTestsMain {
     private static KeyStore keyStore = KeyStore.getKeyStoreInstance();
     private static BoTService botService = BoTService.getBoTServiceInstance();
     private static PairingService pairService = PairingService.getPairingServiceInstance();
@@ -407,6 +407,7 @@ public class Main {
 		bleService.executeBLENOService();
 	}
 	
+	/*
 	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, 
 	                   IOException, InvalidKeySpecException, CertificateException, KeyManagementException, InterruptedException, WriterException {
 		
@@ -432,5 +433,5 @@ public class Main {
 		//testBlenoServiceMultiPair();
 		testBlenoServiceWithPairedDevice();
 	}
-
+	*/
 }
