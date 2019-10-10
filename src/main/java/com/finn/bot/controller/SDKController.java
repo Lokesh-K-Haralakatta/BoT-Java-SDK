@@ -115,27 +115,39 @@ public class SDKController {
     		
     		String actionId = parsedActionId.substring(1, parsedActionId.length()-1);
     		LOGGER.info("Given Action ID: " + actionId);
-    		if(!actionExistsWithServer(actionId))
-        		return ResponseEntity
-    					.badRequest()
-    					.contentType(MediaType.TEXT_PLAIN)
-    					.body("ActionId: "+ actionId + " does not exists with Server Actions"); 
-    		else if(KeyStore.getKeyStoreInstance().getDeviceState() < KeyStore.DEVICE_ACTIVE)
+    		if(KeyStore.getKeyStoreInstance().getDeviceState() < KeyStore.DEVICE_ACTIVE)
         		return ResponseEntity
     					.badRequest()
     					.contentType(MediaType.TEXT_PLAIN)
     					.body("Invalid Device State: "+KeyStore.getKeyStoreInstance().getDeviceState(KeyStore.getKeyStoreInstance().getDeviceState()));
     		else if(KeyStore.getKeyStoreInstance().getDeviceState() == KeyStore.DEVICE_MULTIPAIR &&
-    				KeyStore.getKeyStoreInstance().getDeviceAltId() == null)
-    			return ResponseEntity
+    				( KeyStore.getKeyStoreInstance().getDeviceAltId() == null || 
+    				  KeyStore.getKeyStoreInstance().getDeviceAltId().length() == 0)){
+    			LOGGER.info("Device is Multipair Enabled and Device Alternate ID is Missing");
+    				return ResponseEntity
     					.badRequest()
     					.contentType(MediaType.TEXT_PLAIN)
     					.body("Multipair Device, Missing Alternate Id for the device");
-    		else
-    			return ResponseEntity
-    					.ok()
+    		}
+    		else if(!actionExistsWithServer(actionId))
+        		return ResponseEntity
+    					.badRequest()
     					.contentType(MediaType.TEXT_PLAIN)
-    					.body("Given Action ID: "+actionId);
+    					.body("ActionId: "+ actionId + " does not exists with Server Actions"); 
+    		else {
+    			LOGGER.info("Triggering the action with actionID: " + actionId);
+    			String response = ActionService.getActionServiceInstance().triggerAction(actionId);
+    			if(response != null && response.contains("status\":\"OK"))
+    				return ResponseEntity
+        					.ok()
+        					.contentType(MediaType.TEXT_PLAIN)
+        					.body("Action trigger successful for "+actionId);
+    			else
+    				return ResponseEntity
+        					.badRequest()
+        					.contentType(MediaType.TEXT_PLAIN)
+        					.body("Action trigger failed: " + response);
+    		}
     	}
     	catch(Exception e){
     		return ResponseEntity
