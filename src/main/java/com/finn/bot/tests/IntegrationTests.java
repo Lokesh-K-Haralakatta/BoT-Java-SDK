@@ -1,6 +1,6 @@
-package com.finn.bot;
+package com.finn.bot.tests;
 /*
-Main.java - Testing Java SDK various classes methods as Integration tests
+IntegrationTests.java - Testing Java SDK various classes methods as Integration tests
 Created by Lokesh H K, August 09, 2019.
 Released into the repository BoT-Java-SDK.
 */
@@ -14,6 +14,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.Set;
 
+import com.finn.bot.api.SDKWrapper;
 import com.finn.bot.core.BoTService;
 import com.finn.bot.service.ActionService;
 import com.finn.bot.service.ActivationService;
@@ -25,7 +26,7 @@ import com.finn.bot.store.ActionInfo;
 import com.finn.bot.store.KeyStore;
 import com.google.zxing.WriterException;
 
-public class IntegrationTestsMain {
+public class IntegrationTests {
     private static KeyStore keyStore = KeyStore.getKeyStoreInstance();
     private static BoTService botService = BoTService.getBoTServiceInstance();
     private static PairingService pairService = PairingService.getPairingServiceInstance();
@@ -407,8 +408,11 @@ public class IntegrationTestsMain {
 		bleService.executeBLENOService();
 	}
 	
-	/*
-	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, 
+	private static void testSDKWrapperMethods(){
+		System.out.println("Total actions retrieved: " + SDKWrapper.getActions().size());
+	}
+	
+	public static void runTests() throws NoSuchProviderException, NoSuchAlgorithmException, 
 	                   IOException, InvalidKeySpecException, CertificateException, KeyManagementException, InterruptedException, WriterException {
 		
 		//Command to execute the main method
@@ -431,7 +435,7 @@ public class IntegrationTestsMain {
 		//testDeviceConfiguration();
 		//testBlenoService();
 		//testBlenoServiceMultiPair();
-		testBlenoServiceWithPairedDevice();
+		//testBlenoServiceWithPairedDevice();
+		testSDKWrapperMethods();
 	}
-	*/
 }
