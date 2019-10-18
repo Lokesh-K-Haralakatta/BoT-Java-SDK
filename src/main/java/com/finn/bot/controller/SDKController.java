@@ -31,9 +31,9 @@ public class SDKController {
 		List<ActionDTO> actions = ActionService.getActionServiceInstance().getActions();
 		for(ActionDTO action : actions){
 			String serverActionId = action.getActionID();
-			LOGGER.info("Server Action ID: " + serverActionId);
+			LOGGER.fine("Server Action ID: " + serverActionId);
 			if(serverActionId.compareToIgnoreCase(actionId) == 0){
-				LOGGER.info("Given actionId: " + actionId + " found with actions retrieved from server");
+				LOGGER.fine("Given actionId: " + actionId + " found with actions retrieved from server");
 				return true;
 			}
 		}
@@ -114,7 +114,7 @@ public class SDKController {
     					.body("Required JSON Body Format: "+bodyFormat);
     		
     		String actionId = parsedActionId.substring(1, parsedActionId.length()-1);
-    		LOGGER.info("Given Action ID: " + actionId);
+    		LOGGER.fine("Given Action ID: " + actionId);
     		if(KeyStore.getKeyStoreInstance().getDeviceState() < KeyStore.DEVICE_ACTIVE)
         		return ResponseEntity
     					.badRequest()
@@ -123,7 +123,7 @@ public class SDKController {
     		else if(KeyStore.getKeyStoreInstance().getDeviceState() == KeyStore.DEVICE_MULTIPAIR &&
     				( KeyStore.getKeyStoreInstance().getDeviceAltId() == null || 
     				  KeyStore.getKeyStoreInstance().getDeviceAltId().length() == 0)){
-    			LOGGER.info("Device is Multipair Enabled and Device Alternate ID is Missing");
+    			LOGGER.severe("Device is Multipair Enabled and Device Alternate ID is Missing");
     				return ResponseEntity
     					.badRequest()
     					.contentType(MediaType.TEXT_PLAIN)

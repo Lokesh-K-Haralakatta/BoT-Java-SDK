@@ -113,7 +113,9 @@ public class ConfigurationService {
 			case KeyStore.DEVICE_PAIRED: LOGGER.info("Device paired but not activated, Initializing activation process...");
 										 activationService.activateDevice();
 										 break;
-			case KeyStore.DEVICE_ACTIVE: LOGGER.info("Device is already active, enbaled for autonomous payments");
+			case KeyStore.DEVICE_ACTIVE: LOGGER.info("Device is already active, enabled for autonomous payments");
+										 break;
+			case KeyStore.DEVICE_MULTIPAIR: LOGGER.info("Device is Multipair enabled, Alternate DeviceId: " + keyStore.getDeviceAltId());
 										 break;
             default:
             	     LOGGER.warning("Device state is invalid, reset device configuration and try again!!!");

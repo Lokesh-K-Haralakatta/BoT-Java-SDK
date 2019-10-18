@@ -408,15 +408,67 @@ public class IntegrationTests {
 		bleService.executeBLENOService();
 	}
 	
-	private static void testSDKWrapperMethods(){
+	private static void testSDKWrapperPairActivate() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InterruptedException, IOException, WriterException{
+		//Retrieving actions from server
 		System.out.println("Total actions retrieved: " + SDKWrapper.getActions().size());
+		
+		//Reset device configuration if required
+		//configService.resetDeviceConfiguration(true, true);
+		
+		//Testing device pair and activation for payments
+		if(SDKWrapper.pairAndActivateDevice("469908A3-8F6C-46AC-84FA-4CF1570E564B", null, true, false, null))
+			System.out.println("SDKWrapper.pairAndActivateDevice Success");
+		else
+			System.out.println("SDKWrapper.pairAndActivateDevice Failed!!!");
+	}
+	
+	private static void testSDKWrapperPairActivateMultiPair() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InterruptedException, IOException, WriterException{
+		//Reset device configuration if required
+		//configService.resetDeviceConfiguration(true, true);
+		
+		//Testing device pair and activation for payments of Multipair device
+		if(SDKWrapper.pairAndActivateDevice("469908A3-8F6C-46AC-84FA-4CF1570E564B", "RPI-Zero-Java-MP-1", true, true, "RPI-Java-MLP-1"))
+			System.out.println("SDKWrapper.pairAndActivateDevice Success");
+		else
+			System.out.println("SDKWrapper.pairAndActivateDevice Failed!!!");
+	}	
+	
+	private static void testSDKWrapperTriggerAction(){
+		//Try to call triggerAction with actionId as null or zero length
+		SDKWrapper.triggerAction("", 0.0);
+		
+		//Try to call triggerAction with device state as new
+		int deviceState = keyStore.getDeviceState();
+		keyStore.setDeviceState(KeyStore.DEVICE_NEW);
+		SDKWrapper.triggerAction("unknownAction", 0.0);
+		
+		//Try to call triggerAction with empty alternate device id for multipair device
+		keyStore.setDeviceState(KeyStore.DEVICE_MULTIPAIR);
+		String altId = keyStore.getDeviceAltId();
+		keyStore.setDeviceAltId("");
+		SDKWrapper.triggerAction("unknownAction", 0.0);
+		
+		//Resotre the device state
+		keyStore.setDeviceAltId(altId);
+		keyStore.setDeviceState(deviceState);
+		
+		//Trigger the unknown action with the original device state
+		SDKWrapper.triggerAction("unknownAction", 0.0);
+		
+		//Trigger the valid action with the original device state
+		String actionId = "E6509B49-5048-4151-B965-BB7B2DBC7905";
+		if(SDKWrapper.triggerAction(actionId, 0.0))
+			System.out.println("Triggering valid action successful");
+		else
+			System.out.println("Triggering valid action failed!!!");
 	}
 	
 	public static void runTests() throws NoSuchProviderException, NoSuchAlgorithmException, 
 	                   IOException, InvalidKeySpecException, CertificateException, KeyManagementException, InterruptedException, WriterException {
 		
-		//Command to execute the main method
-		//java -Dbleno.service.path=/home/pi -cp BoT-Java-SDK-0.0.1-SNAPSHOT.jar com.finn.bot.Main
+		//Command to execute the runTests method 
+		//java -Dbleno.service.path=/home/pi -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar tests
+		//java -Dbleno.service.path=/home/pi -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar tests
 		
 		//testActionsStore();
 		//testKeyPairsFunctionality();
@@ -436,6 +488,8 @@ public class IntegrationTests {
 		//testBlenoService();
 		//testBlenoServiceMultiPair();
 		//testBlenoServiceWithPairedDevice();
-		testSDKWrapperMethods();
+		//testSDKWrapperMethods();
+		//testSDKWrapperPairActivateMultiPair();
+		testSDKWrapperTriggerAction();
 	}
 }
