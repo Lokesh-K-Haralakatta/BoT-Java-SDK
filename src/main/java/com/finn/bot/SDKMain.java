@@ -8,7 +8,7 @@ Released into the repository BoT-Java-SDK.
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.finn.bot.examples.SDKWrapperGetActions;
+import com.finn.bot.examples.SDKWrapperLibSample;
 import com.finn.bot.tests.IntegrationTests;
 
 @SpringBootApplication
@@ -24,7 +24,7 @@ public class SDKMain {
 							  	e.printStackTrace();
 						  	  }
 						  	  break;
-				case "libSample": SDKWrapperGetActions.runSample(); break;
+				case "libSample": SDKWrapperLibSample.run(); break;
 				case "serverSample": System.out.println("Given Option is to run Server Sample"); break;
 			}
 		else

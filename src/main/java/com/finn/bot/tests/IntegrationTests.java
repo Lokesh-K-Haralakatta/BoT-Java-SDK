@@ -415,8 +415,13 @@ public class IntegrationTests {
 		//Reset device configuration if required
 		//configService.resetDeviceConfiguration(true, true);
 		
+		//Initialize the device configuration
+		ConfigurationService.getConfigurationServiceInstance().initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", 
+				                  "RPI-Zero-Java", true, false, null);
+		ConfigurationService.getConfigurationServiceInstance().configureDevice();
+		
 		//Testing device pair and activation for payments
-		if(SDKWrapper.pairAndActivateDevice("469908A3-8F6C-46AC-84FA-4CF1570E564B", null, true, false, null))
+		if(SDKWrapper.pairAndActivateDevice())
 			System.out.println("SDKWrapper.pairAndActivateDevice Success");
 		else
 			System.out.println("SDKWrapper.pairAndActivateDevice Failed!!!");
@@ -426,8 +431,13 @@ public class IntegrationTests {
 		//Reset device configuration if required
 		//configService.resetDeviceConfiguration(true, true);
 		
+		//Initialize the device configuration
+		ConfigurationService.getConfigurationServiceInstance().initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", 
+				                  "RPI-Zero-Java-MP", true, true, "Java-MPD");
+		ConfigurationService.getConfigurationServiceInstance().configureDevice();
+		
 		//Testing device pair and activation for payments of Multipair device
-		if(SDKWrapper.pairAndActivateDevice("469908A3-8F6C-46AC-84FA-4CF1570E564B", "RPI-Zero-Java-MP-1", true, true, "RPI-Java-MLP-1"))
+		if(SDKWrapper.pairAndActivateDevice())
 			System.out.println("SDKWrapper.pairAndActivateDevice Success");
 		else
 			System.out.println("SDKWrapper.pairAndActivateDevice Failed!!!");

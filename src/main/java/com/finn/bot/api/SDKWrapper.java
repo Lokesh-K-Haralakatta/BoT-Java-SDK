@@ -50,21 +50,20 @@ public class SDKWrapper {
 	}
 	
 	//Static Method to pair and activate the device
-	public static boolean pairAndActivateDevice(final String makerID, final String deviceName, 
-		final Boolean generateDeviceID, final Boolean isMultiPair, final String alternateID) throws InterruptedException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, IOException, WriterException{
+	public static boolean pairAndActivateDevice() throws InterruptedException, NoSuchProviderException, 
+	              NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, IOException, 
+	              WriterException{
 		Boolean devicePaired = false;
 		if(( devicePaired = pairingService.isDevicePaired())){
 			LOGGER.info("Device is already paired, proceeding with configuring the device for payments");
 			configService.configureDevice();
 		}
 		else {
-			LOGGER.info("Device is not paired yet, proceeding with device initialization and configuration");
-			configService.resetDeviceConfiguration(generateDeviceID, deviceName!=null);
-			configService.initializeDeviceConfiguration(makerID, deviceName, generateDeviceID, isMultiPair, alternateID);
-			configService.configureDevice();
+			LOGGER.info("Device is not paired yet, proceeding with device pairing and configuration");
 			//Call executeBLENOService method to start bleno-service.js
 			bleService.executeBLENOService();
 			devicePaired = pairingService.isDevicePaired();
+			configService.configureDevice();
 		}
 		
 		return devicePaired;
