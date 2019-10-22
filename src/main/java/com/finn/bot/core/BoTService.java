@@ -161,7 +161,7 @@ public class BoTService {
             httpget.addHeader("deviceID", keyStore.getDeviceId());
             
             //Execute HTTP GET
-            LOGGER.info("Executing request " + httpget.getRequestLine());
+            LOGGER.fine("Executing request " + httpget.getRequestLine());
             CloseableHttpResponse response = null;
             if(https){
             	// create http context where the certificate will be added
@@ -169,7 +169,7 @@ public class BoTService {
                 response = httpclient.execute(httpget,context);
                 fingerPrintStatus = verifyFingerPrint(context);
                 if(fingerPrintStatus)
-                	LOGGER.info("SSL Finger Print Verification Succeeded for HTTP GET");
+                	LOGGER.fine("SSL Finger Print Verification Succeeded for HTTP GET");
                 else {
                 	LOGGER.severe("SSL Finger Print Verification Failed for HTTP GET");
                 	return("SSL Finger Print Verification Failed for HTTP GET");
@@ -188,7 +188,7 @@ public class BoTService {
             //Check the response code and respond back
             int statusCode = response.getStatusLine().getStatusCode();
             if( statusCode == 200){
-            	LOGGER.info("HTTP GET Call Succeeded...");
+            	LOGGER.fine("HTTP GET Call Succeeded...");
             	responseBody = decodeJWT(responseBody);
             	LOGGER.fine("HTTP GET Call BoT Value: "+responseBody);
             }
@@ -297,7 +297,7 @@ public class BoTService {
             httpPost.addHeader("Content-Type", "application/json");
             
             //Execute HTTP POST
-            LOGGER.info("Executing request " + httpPost.getRequestLine());
+            LOGGER.fine("Executing request " + httpPost.getRequestLine());
             CloseableHttpResponse response = null;
             if(https){
             	// create http context where the certificate will be added
@@ -305,7 +305,7 @@ public class BoTService {
                 response = httpclient.execute(httpPost,context);
                 fingerPrintStatus = verifyFingerPrint(context);
                 if(fingerPrintStatus)
-                	LOGGER.info("SSL Finger Print Verification Succeeded for HTTP POST");
+                	LOGGER.fine("SSL Finger Print Verification Succeeded for HTTP POST");
                 else {
                 	LOGGER.severe("SSL Finger Print Verification Failed for HTTP POST");
                 	return ("SSL Finger Print Verification Failed for HTTP POST");
@@ -324,7 +324,7 @@ public class BoTService {
             //Check the response code and respond back
             int statusCode = response.getStatusLine().getStatusCode();
             if( statusCode == 200){
-            	LOGGER.info("HTTP POST Call Succeeded...");
+            	LOGGER.fine("HTTP POST Call Succeeded...");
             	responseBody = decodeJWT(responseBody);
             	LOGGER.fine("HTTP Post Call BoT Value: "+responseBody);
             }
@@ -384,7 +384,7 @@ public class BoTService {
 			
 			payloadHash.put("bot", items);
 			String payloadStr = jsonObject.toJson(payloadHash);
-			LOGGER.info("Payload Data String: "+payloadStr);
+			LOGGER.fine("Payload Data String: "+payloadStr);
 			
 			// Encode JWT Header and JWT Data in Base64
 			String encHeader = Base64.getEncoder().encodeToString(jwtHdrStr.getBytes(StandardCharsets.UTF_8));

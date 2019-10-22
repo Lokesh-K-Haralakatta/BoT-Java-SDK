@@ -53,7 +53,7 @@ public class ActionService {
 			botResponse = bot.get(ACTIONS_END_POINT);
 			if(botResponse != null && !botResponse.contains("Failed with StatusCode:")){
 				actions = new Gson().fromJson(botResponse, listType);
-				LOGGER.info("Total number of actions retrieved from server: " +actions.size());
+				LOGGER.fine("Total number of actions retrieved from server: " +actions.size());
 				keyStore.saveActions(botResponse);
 			}
 			else {
@@ -61,18 +61,18 @@ public class ActionService {
 				botResponse = keyStore.getActions();
 				if(botResponse != null){
 					actions = new Gson().fromJson(botResponse, listType);
-					LOGGER.info("Total number of actions retrieved from local store: " +actions.size());
+					LOGGER.fine("Total number of actions retrieved from local store: " +actions.size());
 				}
 			}
 		}
 		catch(Exception e){
 			LOGGER.severe("Exception Caught while retrieveing actions from server: ");
 			LOGGER.severe(ExceptionUtils.getStackTrace(e));
-			LOGGER.warning("Getting local stored actions...");
+			LOGGER.fine("Getting local stored actions...");
 			botResponse = keyStore.getActions();
 			if(botResponse != null){
 				actions = new Gson().fromJson(botResponse, listType);
-				LOGGER.info("Total number of actions retrieved from local store: " +actions.size());
+				LOGGER.fine("Total number of actions retrieved from local store: " +actions.size());
 			}
 		}
 		return actions;
@@ -81,7 +81,7 @@ public class ActionService {
 	//Method to initiate action with the back end server and return the response
 	private synchronized String postAction(final String actionID){
 		if(actionID == null){
-			LOGGER.warning("ActionID can not be NULL");
+			LOGGER.severe("ActionID can not be NULL");
 			return null;
 		}
 		
@@ -98,11 +98,11 @@ public class ActionService {
 	//Method for end user to trigger an action
 	public String triggerAction(final String actionID){
 		if(actionID == null){
-			LOGGER.warning("ActionID can not be NULL");
+			LOGGER.severe("ActionID can not be NULL");
 			return null;
 		}
 		else if(!isActionValid(actionID)){
-			LOGGER.warning("Invalid ActionID - " +actionID);
+			LOGGER.severe("Invalid ActionID - " +actionID);
 			return null;
 			
 		}
@@ -126,7 +126,7 @@ public class ActionService {
 			return true;
 		}
 		else {
-			LOGGER.warning("Given actionID: "+actionID+" - Not present in retrieved actions OR "
+			LOGGER.severe("Given actionID: "+actionID+" - Not present in retrieved actions OR "
 					+ "Action Frequency is not valid");
 			return false;
 		}	

@@ -37,7 +37,7 @@ public class SDKController {
 				return true;
 			}
 		}
-		LOGGER.warning("Given actionId: " + actionId + " not found with actions retrieved from server");
+		LOGGER.severe("Given actionId: " + actionId + " not found with actions retrieved from server");
 		return false;
 	}
 	
@@ -135,7 +135,7 @@ public class SDKController {
     					.contentType(MediaType.TEXT_PLAIN)
     					.body("ActionId: "+ actionId + " does not exists with Server Actions"); 
     		else {
-    			LOGGER.info("Triggering the action with actionID: " + actionId);
+    			LOGGER.fine("Triggering the action with actionID: " + actionId);
     			String response = ActionService.getActionServiceInstance().triggerAction(actionId);
     			if(response != null && response.contains("status\":\"OK"))
     				return ResponseEntity

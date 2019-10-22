@@ -74,13 +74,13 @@ public class PairingService {
 		int tries = 0;
 		do {
 			tries++;
-			LOGGER.info("Polling Device Pair Status - Attempt#" + tries + " ...");
+			LOGGER.fine("Polling Device Pair Status - Attempt#" + tries + " ...");
 			if(isDevicePaired()) {
 				return true;
 			}
 			Thread.sleep(PairingService.POLLING_INTERVAL_IN_MILLISECONDS);
 		}while(tries < PairingService.MAXIMUM_TRIES);
-		LOGGER.warning("Device not paired in max attempts# "+tries+" , try again!!!");
+		LOGGER.fine("Device not paired in max attempts# "+tries+" , try again!!!");
 		return false;
 	}
 		
@@ -89,17 +89,17 @@ public class PairingService {
 	//Set Device state to paired and pass on the control to activate the device
 	public synchronized void pairDevice() throws InterruptedException{
 		if(!this.isDevicePairable() || this.isDeviceMaultipair()){
-			LOGGER.warning("Device is already paired and activated OR Device is Multipair");
+			LOGGER.fine("Device is already paired and activated OR Device is Multipair");
 			return;
 		}
 		
 		if(pollPairingStatus()){
 			keyStore.setDeviceState(KeyStore.DEVICE_PAIRED);
-			LOGGER.info("Device successfully paired, Activating Device ...");
+			LOGGER.fine("Device successfully paired, Activating Device ...");
 			ActivationService.getActivationServiceInstance().activateDevice();
 		}
 		else {
-			LOGGER.warning("Device Not Paired with in given max number tries");
+			LOGGER.fine("Device Not Paired with in given max number tries");
 		}
 	}
 	

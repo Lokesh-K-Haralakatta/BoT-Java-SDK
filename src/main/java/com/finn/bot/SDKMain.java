@@ -27,7 +27,11 @@ public class SDKMain {
 				case "libSample": SDKWrapperLibSample.run(); break;
 				case "serverSample": System.out.println("Given Option is to run Server Sample"); break;
 			}
-		else
-			System.out.println("Usage: java -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar [server | tests | libSample | serverSample]");
+		else {
+			System.out.println("Default Usage: java -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar [server | tests | libSample | serverSample]");
+			System.out.println("Usage with JVM properties: java -Dbleno.service.path=bleo-service-path "
+					+ " -Djava.util.logging.config.file=logging-properties-file "
+					+ " -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar [server | tests | libSample | serverSample]");
+		}
 	}
 }

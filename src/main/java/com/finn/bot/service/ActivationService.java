@@ -59,13 +59,13 @@ public class ActivationService {
 		int tries = 0;
 		do {
 			tries++;
-			LOGGER.info("Polling Device Activation Status - Attempt#" + tries + " ...");
+			LOGGER.fine("Polling Device Activation Status - Attempt#" + tries + " ...");
 			if(isDeviceActivated()) {
 				return true;
 			}
 			Thread.sleep(ActivationService.POLLING_INTERVAL_IN_MILLISECONDS);
 		}while(tries < ActivationService.MAXIMUM_TRIES);
-		LOGGER.warning("Device not activated in max attempts# "+tries+" , try again!!!");
+		LOGGER.severe("Device not activated in max attempts# "+tries+" , try again!!!");
 		return false;		
 	}
 	
@@ -74,10 +74,10 @@ public class ActivationService {
 	public synchronized void activateDevice() throws InterruptedException{
 		if(pollActivationStatus()){
 			keyStore.setDeviceState(KeyStore.DEVICE_ACTIVE);
-			LOGGER.info("Device is activated for payments...");
+			LOGGER.fine("Device is activated for payments...");
 		}
 		else {
-			LOGGER.warning("Device could not be activated for payments, try again!!!");
+			LOGGER.severe("Device could not be activated for payments, try again!!!");
 		}
 	}
 }

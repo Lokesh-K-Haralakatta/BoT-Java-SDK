@@ -413,15 +413,11 @@ public class IntegrationTests {
 		System.out.println("Total actions retrieved: " + SDKWrapper.getActions().size());
 		
 		//Reset device configuration if required
-		//configService.resetDeviceConfiguration(true, true);
-		
-		//Initialize the device configuration
-		ConfigurationService.getConfigurationServiceInstance().initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", 
-				                  "RPI-Zero-Java", true, false, null);
-		ConfigurationService.getConfigurationServiceInstance().configureDevice();
+		//SDKWrapper.resetDeviceConfiguration(true, true);
 		
 		//Testing device pair and activation for payments
-		if(SDKWrapper.pairAndActivateDevice())
+		if(SDKWrapper.pairAndActivateDevice("469908A3-8F6C-46AC-84FA-4CF1570E564B", 
+                "RPI-Zero-Java", true, false, null))
 			System.out.println("SDKWrapper.pairAndActivateDevice Success");
 		else
 			System.out.println("SDKWrapper.pairAndActivateDevice Failed!!!");
@@ -429,15 +425,11 @@ public class IntegrationTests {
 	
 	private static void testSDKWrapperPairActivateMultiPair() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InterruptedException, IOException, WriterException{
 		//Reset device configuration if required
-		//configService.resetDeviceConfiguration(true, true);
-		
-		//Initialize the device configuration
-		ConfigurationService.getConfigurationServiceInstance().initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", 
-				                  "RPI-Zero-Java-MP", true, true, "Java-MPD");
-		ConfigurationService.getConfigurationServiceInstance().configureDevice();
+		//SDKWrapper.resetDeviceConfiguration(true, true);
 		
 		//Testing device pair and activation for payments of Multipair device
-		if(SDKWrapper.pairAndActivateDevice())
+		if(SDKWrapper.pairAndActivateDevice("469908A3-8F6C-46AC-84FA-4CF1570E564B", 
+                "RPI-Zero-Java-MP", true, true, "Java-MPD"))
 			System.out.println("SDKWrapper.pairAndActivateDevice Success");
 		else
 			System.out.println("SDKWrapper.pairAndActivateDevice Failed!!!");

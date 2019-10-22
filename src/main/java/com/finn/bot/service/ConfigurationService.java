@@ -42,32 +42,32 @@ public class ConfigurationService {
 		final boolean generateDeviceID, final boolean isMultiPair, final String alternateID) throws NoSuchProviderException, NoSuchAlgorithmException,
 	    InvalidKeySpecException, CertificateException, IOException, WriterException{
 		
-		LOGGER.info("Initializing the device with makerID: "+makerID);
+		LOGGER.fine("Initializing the device with makerID: "+makerID);
 		keyStore.setMakerId(makerID);
 		
 		if(!keyStore.isKeyPairGenerated()){
-			LOGGER.info("Generating the key-pair for the device");
+			LOGGER.fine("Generating the key-pair for the device");
 			keyStore.generateAndStoreKeyPair(true);
 		}
 		
 		//Handle deviceID for the device
 		if(generateDeviceID){
-			LOGGER.info("Generating the fresh deviceID for the device");
+			LOGGER.fine("Generating the fresh deviceID for the device");
 			keyStore.setDeviceId(keyStore.generateUUID4());
 		}
 		else if(keyStore.getDeviceId() == null || keyStore.getDeviceId() == ""){
-			LOGGER.info("DeviceID does not exist in KeyStore, generating the fresh deviceID for the device");
+			LOGGER.fine("DeviceID does not exist in KeyStore, generating the fresh deviceID for the device");
 			keyStore.setDeviceId(keyStore.generateUUID4());
 		}
 		else
-			LOGGER.info("Reusing the existing deviceID present in KeyStore for the device: " +keyStore.getDeviceId());
+			LOGGER.fine("Reusing the existing deviceID present in KeyStore for the device: " +keyStore.getDeviceId());
 		
 		//Handle deviceName for the device
 		if(deviceName != null)
 			keyStore.setDeviceName(deviceName);
 		else
 			keyStore.setDeviceName("BoT-Java-SDK-Device");
-		LOGGER.info("DeviceName set to: " +keyStore.getDeviceName());
+		LOGGER.fine("DeviceName set to: " +keyStore.getDeviceName());
 		
 		//Handle device pair type and set device state accordingly
 		if(isMultiPair){
@@ -76,15 +76,15 @@ public class ConfigurationService {
 				keyStore.setDeviceAltId(alternateID);
 			else
 				keyStore.setDeviceAltId("altID");
-			LOGGER.info("Device enabled for multipair with alternate deviceID: " + keyStore.getDeviceAltId());
+			LOGGER.fine("Device enabled for multipair with alternate deviceID: " + keyStore.getDeviceAltId());
 		}
 		else
 			keyStore.setDeviceState(KeyStore.DEVICE_NEW);
-		LOGGER.info("Device State set to " + keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.fine("Device State set to " + keyStore.getDeviceState(keyStore.getDeviceState()));
 		
 		//Generate QRCode for the device if needed
 		if(!keyStore.isQRCodeGenerated()){
-			LOGGER.info("Generating the fresh QRCode for the device");
+			LOGGER.fine("Generating the fresh QRCode for the device");
 			keyStore.generateQRCode();
 		}
 	}
@@ -107,18 +107,18 @@ public class ConfigurationService {
 	//Method to configure the device status based on the present state
 	public void configureDevice() throws InterruptedException{
 		switch(keyStore.getDeviceState()){
-			case KeyStore.DEVICE_NEW: LOGGER.info("Device not paired yet, Initializing pairing...");
+			case KeyStore.DEVICE_NEW: LOGGER.fine("Device not paired yet, Initializing pairing...");
 									  pairingService.pairDevice();
 									  break;
-			case KeyStore.DEVICE_PAIRED: LOGGER.info("Device paired but not activated, Initializing activation process...");
+			case KeyStore.DEVICE_PAIRED: LOGGER.fine("Device paired but not activated, Initializing activation process...");
 										 activationService.activateDevice();
 										 break;
-			case KeyStore.DEVICE_ACTIVE: LOGGER.info("Device is already active, enabled for autonomous payments");
+			case KeyStore.DEVICE_ACTIVE: LOGGER.fine("Device is already active, enabled for autonomous payments");
 										 break;
-			case KeyStore.DEVICE_MULTIPAIR: LOGGER.info("Device is Multipair enabled, Alternate DeviceId: " + keyStore.getDeviceAltId());
+			case KeyStore.DEVICE_MULTIPAIR: LOGGER.fine("Device is Multipair enabled, Alternate DeviceId: " + keyStore.getDeviceAltId());
 										 break;
             default:
-            	     LOGGER.warning("Device state is invalid, reset device configuration and try again!!!");
+            	     LOGGER.fine("Device state is invalid, reset device configuration and try again!!!");
 		}
 	}
 }

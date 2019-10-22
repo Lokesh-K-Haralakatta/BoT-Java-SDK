@@ -11,14 +11,11 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.finn.bot.api.SDKWrapper;
-import com.finn.bot.service.ConfigurationService;
 import com.finn.bot.store.ActionDTO;
-import com.finn.bot.store.KeyStore;
 
 /*
  * The below given steps describes the flow:
  * 		- Reset Device Configuration only if needed
- * 		- Initialize the device configuration, if it's not already done
  * 		- Pair and activate the device using BLE with the FINN Mobile Application
  * 		- Retrieve actions from the BoT Server
  * 		- Check and validate the given actionId is present in retrieved actions
@@ -58,17 +55,13 @@ public class SDKWrapperLibSample {
 			//Reset Device Configuration only if needed
 			//boolean resetDeviceID = true;
 			//boolean resetDeviceName = true;
-			//ConfigurationService.getConfigurationServiceInstance().resetDeviceConfiguration(resetDeviceID, resetDeviceName);
-			
-			//Initialize the device configuration, if it's not already done
-			if(KeyStore.getKeyStoreInstance().getDeviceState() == KeyStore.DEVICE_INVALID){
-			ConfigurationService.getConfigurationServiceInstance().initializeDeviceConfiguration(makerId, 
-					                  deviceName, generateDeviceId, deviceMultiPair, alternateDeviceId);
-			}
+			//SDKWrapper.resetDeviceConfiguration(resetDeviceID, resetDeviceName);
+			//LOGGER.info("Device Configuration reset done");
 			
 			//Pair the device using BLE with the FINN Mobile Application
-			LOGGER.info("Waiting for device to be paired through BLE...");
-			if(SDKWrapper.pairAndActivateDevice()){
+			LOGGER.info("Pairing and Activating the device through BLE, if not already done");
+			if(SDKWrapper.pairAndActivateDevice(makerId, 
+	                  deviceName, generateDeviceId, deviceMultiPair, alternateDeviceId)){
 				LOGGER.info("Device Successfully paired and activated for autonomous payments");
 				LOGGER.info("Triggering the action with actionId: " + actionId);
 				List<ActionDTO> actions = SDKWrapper.getActions();
