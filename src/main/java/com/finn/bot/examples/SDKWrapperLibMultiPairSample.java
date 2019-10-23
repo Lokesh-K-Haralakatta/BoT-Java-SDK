@@ -1,7 +1,7 @@
 package com.finn.bot.examples;
 /*
-SDKWrapperLibSample - Java Sample Application to show case the usage of BoT-Java-SDK as a library for single pair
-Created by Lokesh H K, October 21, 2019.
+SDKWrapperLibMultiPairSample - Java Sample Application to show case the usage of BoT-Java-SDK as a library for multipair
+Created by Lokesh H K, October 23, 2019.
 Released into the repository BoT-Java-SDK.
 */
 
@@ -25,29 +25,28 @@ import com.finn.bot.store.ActionDTO;
 /*
  * Command to execute the SDKWrapperLibSample run method 
  
- * java -Dbleno.service.path=/home/pi -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar libSample
- * java -Dbleno.service.path=/home/pi -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar libSample
+ * java -Dbleno.service.path=/home/pi -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar libMultiPairSample
+ * java -Dbleno.service.path=/home/pi -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar libMultiPairSample
 */
-
-public class SDKWrapperLibSample {
+public class SDKWrapperLibMultiPairSample {
 	//Class Logger Instance
-	private final static Logger LOGGER = Logger.getLogger(SDKWrapperLibSample.class.getName());
-	
+	private final static Logger LOGGER = Logger.getLogger(SDKWrapperLibMultiPairSample.class.getName());
+
 	//Default SDK Log file path
 	private final static String logFile = "/tmp/java-sdk.log.*";
 	
 	//Static constants
 	private final static String makerId = "469908A3-8F6C-46AC-84FA-4CF1570E564B";
-	private final static String deviceName = "SDKWrapperLibSample-"+getRandomIntegerBetweenRange(1,100);
+	private final static String deviceName = "SDKWrapperLibMultiPairSample-1";
 	private final static String actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
 	private final static Boolean generateDeviceId = true;
-	private final static Boolean deviceMultiPair = false;
-	private final static String alternateDeviceId = null;
+	private final static Boolean deviceMultiPair = true;
+	private final static String alternateDeviceId = "SDKWrapperMP-1";
 	private final static Integer actionTriggerInterval = 5 * 60 * 1000;
 	
 	//Payments counters
 	private static Integer actionTriggerSucceeded = 0;
-	private static Integer actionTriggerFailed = 0;
+	private static Integer actionTriggerFailed = 0;	
 	
 	public static void run() {
 		try {
@@ -89,12 +88,6 @@ public class SDKWrapperLibSample {
 			LOGGER.severe("Exception while running SDKWrapperLibSample: \n" + ExceptionUtils.getStackTrace(e));
 		}
 	}
-
-	//Method to provide a random number in the given range
-	private static int getRandomIntegerBetweenRange(double min, double max){
-	    int x = (int) ((Math.random()*((max-min)+1))+min);
-	    return x;
-	}
 	
 	//Method to validate the given action is present in the actions defined with the server
 	private static boolean isActionDefinedWithServer(final List<ActionDTO> actions, final String actionId){
@@ -103,5 +96,5 @@ public class SDKWrapperLibSample {
 				return true;
 			
 		return false;
-	}
+	}	
 }

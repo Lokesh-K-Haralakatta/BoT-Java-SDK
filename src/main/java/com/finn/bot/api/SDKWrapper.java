@@ -56,7 +56,7 @@ public class SDKWrapper {
 		InvalidKeySpecException, CertificateException, IOException, WriterException{
 		
 		Boolean devicePaired = false;
-		if(( devicePaired = pairingService.isDevicePaired())){
+		if(keyStore.getDeviceState() != KeyStore.DEVICE_INVALID && ( devicePaired = pairingService.isDevicePaired())){
 			LOGGER.info("Device is already paired, proceeding with configuring the device for payments");
 			configService.configureDevice();
 		}

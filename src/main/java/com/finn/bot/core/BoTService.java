@@ -411,22 +411,25 @@ public class BoTService {
 		
 		if(token != null){
 			// Get API key from keysStore and load using X509 Spec
-			byte[] keyBytes = Base64.getDecoder().decode(keyStore.getKey(KeyStore.API_KEY));
-			X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-			KeyFactory kf = KeyFactory.getInstance("RSA");
-			RSAPublicKey publicKey = (RSAPublicKey) kf.generatePublic(spec);
-			LOGGER.fine("Got API key from keysStore and loaded using X509 Spec");
+			String apiKey = keyStore.getKey(KeyStore.API_KEY);
+			if(apiKey != null){
+				byte[] keyBytes = Base64.getDecoder().decode(apiKey);
+				X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+				KeyFactory kf = KeyFactory.getInstance("RSA");
+				RSAPublicKey publicKey = (RSAPublicKey) kf.generatePublic(spec);
+				LOGGER.fine("Got API key from keysStore and loaded using X509 Spec");
 			
-			// Generate JWT verifier and verify the token
-			JWTVerifier verifier = JWT.require(Algorithm.RSA256((RSAPublicKey)publicKey)).build();
-			try {
-				DecodedJWT jwt = verifier.verify(token);
-				botValue = jwt.getClaim("bot").asString();
-				LOGGER.fine("BoT Value: " +botValue);
-			}
-			catch(JWTVerificationException e){
-				LOGGER.severe("Exception caught while verifying JWT Token");
-				LOGGER.severe(ExceptionUtils.getStackTrace(e));
+				// Generate JWT verifier and verify the token
+				JWTVerifier verifier = JWT.require(Algorithm.RSA256((RSAPublicKey)publicKey)).build();
+				try {
+					DecodedJWT jwt = verifier.verify(token);
+					botValue = jwt.getClaim("bot").asString();
+					LOGGER.fine("BoT Value: " +botValue);
+				}
+				catch(JWTVerificationException e){
+					LOGGER.severe("Exception caught while verifying JWT Token");
+					LOGGER.severe(ExceptionUtils.getStackTrace(e));
+				}
 			}
 		}
 		
