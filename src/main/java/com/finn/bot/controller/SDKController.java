@@ -31,9 +31,9 @@ public class SDKController {
 		List<ActionDTO> actions = ActionService.getActionServiceInstance().getActions();
 		for(ActionDTO action : actions){
 			String serverActionId = action.getActionID();
-			LOGGER.fine("Server Action ID: " + serverActionId);
+			LOGGER.config("Server Action ID: " + serverActionId);
 			if(serverActionId.compareToIgnoreCase(actionId) == 0){
-				LOGGER.fine("Given actionId: " + actionId + " found with actions retrieved from server");
+				LOGGER.config("Given actionId: " + actionId + " found with actions retrieved from server");
 				return true;
 			}
 		}
@@ -114,7 +114,7 @@ public class SDKController {
     					.body("Required JSON Body Format: "+bodyFormat);
     		
     		String actionId = parsedActionId.substring(1, parsedActionId.length()-1);
-    		LOGGER.fine("Given Action ID: " + actionId);
+    		LOGGER.config("Given Action ID: " + actionId);
     		if(KeyStore.getKeyStoreInstance().getDeviceState() < KeyStore.DEVICE_ACTIVE)
         		return ResponseEntity
     					.badRequest()
@@ -135,7 +135,7 @@ public class SDKController {
     					.contentType(MediaType.TEXT_PLAIN)
     					.body("ActionId: "+ actionId + " does not exists with Server Actions"); 
     		else {
-    			LOGGER.fine("Triggering the action with actionID: " + actionId);
+    			LOGGER.config("Triggering the action with actionID: " + actionId);
     			String response = ActionService.getActionServiceInstance().triggerAction(actionId);
     			if(response != null && response.contains("status\":\"OK"))
     				return ResponseEntity

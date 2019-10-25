@@ -53,7 +53,7 @@ public class ActionService {
 			botResponse = bot.get(ACTIONS_END_POINT);
 			if(botResponse != null && !botResponse.contains("Failed with StatusCode:")){
 				actions = new Gson().fromJson(botResponse, listType);
-				LOGGER.fine("Total number of actions retrieved from server: " +actions.size());
+				LOGGER.config("Total number of actions retrieved from server: " +actions.size());
 				keyStore.saveActions(botResponse);
 			}
 			else {
@@ -61,18 +61,18 @@ public class ActionService {
 				botResponse = keyStore.getActions();
 				if(botResponse != null){
 					actions = new Gson().fromJson(botResponse, listType);
-					LOGGER.fine("Total number of actions retrieved from local store: " +actions.size());
+					LOGGER.config("Total number of actions retrieved from local store: " +actions.size());
 				}
 			}
 		}
 		catch(Exception e){
 			LOGGER.severe("Exception Caught while retrieveing actions from server: ");
 			LOGGER.severe(ExceptionUtils.getStackTrace(e));
-			LOGGER.fine("Getting local stored actions...");
+			LOGGER.config("Getting local stored actions...");
 			botResponse = keyStore.getActions();
 			if(botResponse != null){
 				actions = new Gson().fromJson(botResponse, listType);
-				LOGGER.fine("Total number of actions retrieved from local store: " +actions.size());
+				LOGGER.config("Total number of actions retrieved from local store: " +actions.size());
 			}
 		}
 		return actions;
@@ -110,10 +110,10 @@ public class ActionService {
 			Instant triggerTime = Instant.now();
 			String triggerResponse = postAction(actionID);
 			if(triggerResponse != null && !triggerResponse.contains("Not-OK") && triggerResponse.contains("OK")){
-				LOGGER.fine("Action trigger successful for " + actionID + " , saving trigger time...");
+				LOGGER.config("Action trigger successful for " + actionID + " , saving trigger time...");
 				ActionInfo action = new ActionInfo(actionID,Long.toString(triggerTime.getEpochSecond()));
 				keyStore.storeAction(action);
-				LOGGER.fine("Trigger Time saved for action - " +actionID+ " : "+triggerTime.toString());
+				LOGGER.config("Trigger Time saved for action - " +actionID+ " : "+triggerTime.toString());
 			}
 			return triggerResponse;
 		}
@@ -151,8 +151,8 @@ public class ActionService {
 				if(savedAction != null){
 					lastTriggerTimeInSeconds = Long.parseLong(savedAction.getLastTriggerTime());
 					long elapsedSeconds = triggerTime.getEpochSecond() - lastTriggerTimeInSeconds;
-					LOGGER.fine("Action Frequency for " + actionID + " : " + action.getFrequency());
-					LOGGER.fine("Number of seconds since from last trigger for action - " + actionID + " : "+elapsedSeconds);
+					LOGGER.config("Action Frequency for " + actionID + " : " + action.getFrequency());
+					LOGGER.config("Number of seconds since from last trigger for action - " + actionID + " : "+elapsedSeconds);
 					switch(action.getFrequency()){
 						case "always" : return true;
 						case "minutely": return elapsedSeconds > 60;

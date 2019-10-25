@@ -59,7 +59,7 @@ public class ActivationService {
 		int tries = 0;
 		do {
 			tries++;
-			LOGGER.fine("Polling Device Activation Status - Attempt#" + tries + " ...");
+			LOGGER.config("Polling Device Activation Status - Attempt#" + tries + " ...");
 			if(isDeviceActivated()) {
 				return true;
 			}
@@ -74,7 +74,7 @@ public class ActivationService {
 	public synchronized void activateDevice() throws InterruptedException{
 		if(pollActivationStatus()){
 			keyStore.setDeviceState(KeyStore.DEVICE_ACTIVE);
-			LOGGER.fine("Device is activated for payments...");
+			LOGGER.config("Device is activated for payments...");
 		}
 		else {
 			LOGGER.severe("Device could not be activated for payments, try again!!!");

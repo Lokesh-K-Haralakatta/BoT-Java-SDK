@@ -58,7 +58,7 @@ public class BLEService {
 				BufferedReader br = new BufferedReader(
 						new InputStreamReader(is));
 				while ((s = br.readLine()) != null) {
-					LOGGER.fine(s);
+					LOGGER.config(s);
 				}
 			} catch (IOException e) {
 				LOGGER.severe("Exception caught duirng dumping messages from bleno-service.js");
@@ -96,7 +96,7 @@ public class BLEService {
 		}
 		
 		String blenoCmdString = "node" + " " + blenoServicePath + " " + blenoArgs;
-		LOGGER.fine("BLENO Service Command String: " + blenoCmdString);
+		LOGGER.config("BLENO Service Command String: " + blenoCmdString);
 		try {
 			Process proc = rt.exec(blenoCmdString);
 			errorMessageThread = getStreamWrapper(proc.getErrorStream(), "ERROR");
@@ -106,7 +106,7 @@ public class BLEService {
 			do {
 				Thread.sleep(5000);
 				if(pairingService.isDevicePaired()){
-					LOGGER.fine("Device paired, stopping bleno-service.js");
+					LOGGER.config("Device paired, stopping bleno-service.js");
 					proc.destroyForcibly();
 					break;
 				}
@@ -114,7 +114,7 @@ public class BLEService {
 					LOGGER.info("Waiting for device to be paired through BLE Service");
 				}
 			}while(proc.isAlive());
-			LOGGER.fine(blenoServicePath + " Execution Completed");
+			LOGGER.config(blenoServicePath + " Execution Completed");
 		} catch (IOException e) {
 			LOGGER.severe("Exception caught duirng execution of bleno-service.js");
 			LOGGER.severe(ExceptionUtils.getStackTrace(e));

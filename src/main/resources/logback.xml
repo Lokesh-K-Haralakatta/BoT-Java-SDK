@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <logger name="org.apache" level="ERROR" />
-    <logger name="httpclient" level="ERROR" />
+    <property name="LOG_FILE" value="/tmp/BoT-Java-SDK-Webserver.log"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+    <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </root>
+
+    <logger name="org.springframework.web.*" level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <logger name="org.apache.catalina.*" level="SEVERE">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+
 </configuration>

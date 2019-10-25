@@ -77,9 +77,9 @@ public class SDKWrapper {
 		List<ActionDTO> actions = actionService.getActions();
 		for(ActionDTO action : actions){
 			String serverActionId = action.getActionID();
-			LOGGER.fine("Server Action ID: " + serverActionId);
+			LOGGER.config("Server Action ID: " + serverActionId);
 			if(serverActionId.compareToIgnoreCase(actionId) == 0){
-				LOGGER.fine("Given actionId: " + actionId + " found with actions retrieved from server");
+				LOGGER.config("Given actionId: " + actionId + " found with actions retrieved from server");
 				return true;
 			}
 		}

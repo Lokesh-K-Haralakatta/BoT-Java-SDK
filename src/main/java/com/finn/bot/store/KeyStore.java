@@ -102,10 +102,10 @@ public class KeyStore {
 		byte[] qrCodeBytes = null;
 		//Check QRCode generation status, if not generated, generate freshly
 		if(!isQRCodeGenerated()){
-			LOGGER.fine("QRCode is not yet generated, generating now...");
+			LOGGER.config("QRCode is not yet generated, generating now...");
 			try {
 				generateQRCode();
-				LOGGER.fine("QRCode generated, QR_CODE_FLAG set to true");
+				LOGGER.config("QRCode generated, QR_CODE_FLAG set to true");
 			}
 			catch(Exception e){
 				LOGGER.severe("Exception Caught while generating QRCode!!!");
@@ -114,7 +114,7 @@ public class KeyStore {
 		}
 		
 		if(isQRCodeGenerated()){
-			LOGGER.fine("QRCode generated, reading QRCode bytes to return");
+			LOGGER.config("QRCode generated, reading QRCode bytes to return");
 			qrCodeBytes = Base64.getDecoder().decode(jedisClient.get(QR_CODE_KEY));
 		}
 		return qrCodeBytes;
@@ -154,26 +154,26 @@ public class KeyStore {
 			jedisClient.set(QR_CODE_KEY, Base64.getEncoder().encodeToString(bos.toByteArray()));
 			jedisClient.set(QR_CODE_FLAG, "true");
 			
-			LOGGER.fine("QRCode successfully generated and saved to KeyStore");
+			LOGGER.config("QRCode successfully generated and saved to KeyStore");
 		}
 	}
 	
 	//Method to check whether QR_CODE_FLAG initialized and set, returns true / false
 	public Boolean isQRCodeGenerated(){
-		LOGGER.fine("Checking QRCode generated for the device or not");
+		LOGGER.config("Checking QRCode generated for the device or not");
 		if (jedisClient.exists(QR_CODE_FLAG)){
 			String qrcodeFlag = jedisClient.get(QR_CODE_FLAG);
 			if(qrcodeFlag != null && qrcodeFlag.equals("true")){
-				LOGGER.fine("QRCode already generated and present in Key Store");
+				LOGGER.config("QRCode already generated and present in Key Store");
 				return true;
 			}
 			else{
-				LOGGER.fine("QR_CODE_FLAG exists in Redis but it's associated value is either NULL or FALSE");
+				LOGGER.config("QR_CODE_FLAG exists in Redis but it's associated value is either NULL or FALSE");
 				return false;
 			}
 		}
 		else{
-			LOGGER.fine("QR_CODE_FLAG not exists in Redis");
+			LOGGER.config("QR_CODE_FLAG not exists in Redis");
 			return false;
 		}
 	}
@@ -202,7 +202,7 @@ public class KeyStore {
 		//Convert DeviceInfo Instance to JSON String
 		Gson gson = new Gson();
 		String jsonDeviceInfo = gson.toJson(deviceInfo);
-		LOGGER.fine("Device Info in JSON String: " + jsonDeviceInfo);
+		LOGGER.config("Device Info in JSON String: " + jsonDeviceInfo);
 		
 		return jsonDeviceInfo;
 	}
@@ -284,24 +284,24 @@ public class KeyStore {
 		if (jedisClient.exists(KEYPAIR_FLAG)){
 			String keyPairFlag = jedisClient.get(KEYPAIR_FLAG);
 			if(keyPairFlag != null && keyPairFlag.equals("true")){
-				LOGGER.fine("KeyPairs already generated and present in Key Store");
+				LOGGER.config("KeyPairs already generated and present in Key Store");
 				switch(keyType){
 				case API_KEY: key = jedisClient.hget(KEYPAIR_STORE, API_KEY);
-                			  LOGGER.fine("Length of API Key: " + key.length());
+                			  LOGGER.config("Length of API Key: " + key.length());
                 			  break;
 				case PRIVATE_KEY: key = jedisClient.hget(KEYPAIR_STORE, PRIVATE_KEY);
-  			  					  LOGGER.fine("Length of Private Key: " + key.length());
+  			  					  LOGGER.config("Length of Private Key: " + key.length());
   			  					  break;
 				case PUBLIC_KEY: key = jedisClient.hget(KEYPAIR_STORE, PUBLIC_KEY);
-					  			 LOGGER.fine("Length of Public Key: " + key.length());
+					  			 LOGGER.config("Length of Public Key: " + key.length());
 					  			 break;  			  					  
 				}	
 		    }
 			else 
-				LOGGER.fine("KeyPairs are not available in Key Store");
+				LOGGER.config("KeyPairs are not available in Key Store");
 		}
 		else
-			LOGGER.fine("KeyPairs are not yet generated");
+			LOGGER.config("KeyPairs are not yet generated");
 		
 		return key;
 	}
@@ -310,11 +310,11 @@ public class KeyStore {
 	private byte[] readKeyContentsFromFile(final String keyFilePath) throws IOException {
 		
 		//Read key contents from provided key file
-		LOGGER.fine("Loading contents from " + keyFilePath);
+		LOGGER.config("Loading contents from " + keyFilePath);
 		InputStream in = getClass().getResourceAsStream(keyFilePath);
 		DataInputStream dis = new DataInputStream(in);
 		final int keyBytesLength = in.available();
-		LOGGER.fine("Available bytes : " + keyBytesLength);
+		LOGGER.config("Available bytes : " + keyBytesLength);
 		byte[] keyBytes = new byte[keyBytesLength];
 		dis.readFully(keyBytes);
 		in.close();
@@ -324,7 +324,7 @@ public class KeyStore {
 	
 	//Method to check whether KEYPAIR_FLAG initialized and set, returns true / false
 	public Boolean isKeyPairGenerated(){
-		LOGGER.fine("Checking KeyPairs generated for the device or not");
+		LOGGER.config("Checking KeyPairs generated for the device or not");
 		if (jedisClient.exists(KEYPAIR_FLAG)){
 			String keyPairFlag = jedisClient.get(KEYPAIR_FLAG);
 			if(keyPairFlag != null && keyPairFlag.equals("true")){
@@ -332,12 +332,12 @@ public class KeyStore {
 				return true;
 			}
 			else{
-				LOGGER.fine("KEYPAIR_FLAG exists in Redis but it's associated value is either NULL or FALSE");
+				LOGGER.config("KEYPAIR_FLAG exists in Redis but it's associated value is either NULL or FALSE");
 				return false;
 			}
 		}
 		else{
-			LOGGER.fine("KEYPAIR_FLAG not exists in Redis");
+			LOGGER.config("KEYPAIR_FLAG not exists in Redis");
 			return false;
 		}
 	}
@@ -348,7 +348,7 @@ public class KeyStore {
 			byte[] privateKeyBytes = null;
 			byte[] publicKeyBytes = null;
 			if(generateFreshKeyPair){
-				LOGGER.fine("Generating Fresh keyPair for the device");
+				LOGGER.config("Generating Fresh keyPair for the device");
 			
 				KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
 				kpg.initialize(1024);
@@ -356,35 +356,35 @@ public class KeyStore {
 				PrivateKey priv = kp.getPrivate();
 				PublicKey pub = kp.getPublic();
 			
-				LOGGER.fine("Key Pair Generated");
-				LOGGER.fine("Private key format: " + priv.getFormat());
-				LOGGER.fine("Public key format: " + pub.getFormat());
+				LOGGER.config("Key Pair Generated");
+				LOGGER.config("Private key format: " + priv.getFormat());
+				LOGGER.config("Public key format: " + pub.getFormat());
 			
 				privateKeyBytes = priv.getEncoded();
 				publicKeyBytes = pub.getEncoded();
 				
-				LOGGER.fine("Generated fresh key pair for the device");
+				LOGGER.config("Generated fresh key pair for the device");
 			}
 			else {
 				privateKeyBytes = readKeyContentsFromFile(PRIVATE_KEY_FILE);
 				publicKeyBytes = readKeyContentsFromFile(PUBLIC_KEY_FILE);
-				LOGGER.fine("Loaded key pair contents from files");
+				LOGGER.config("Loaded key pair contents from files");
 			}
 			
-			LOGGER.fine("Bytes in Private Key: " +privateKeyBytes.length);
-			LOGGER.fine("Bytes in Public Key: " +publicKeyBytes.length);
+			LOGGER.config("Bytes in Private Key: " +privateKeyBytes.length);
+			LOGGER.config("Bytes in Public Key: " +publicKeyBytes.length);
 			
 			/* Generate private key.*/ 
 			PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
 			KeyFactory kf = KeyFactory.getInstance("RSA");
 			PrivateKey pvtKey = kf.generatePrivate(pkcsKeySpec);
-			LOGGER.fine("Private Key successfully loaded...");
+			LOGGER.config("Private Key successfully loaded...");
 			
 			/* Generate public key.*/
 			X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(publicKeyBytes);
 			kf = KeyFactory.getInstance("RSA");
 			PublicKey pubKey = kf.generatePublic(x509KeySpec);
-			LOGGER.fine("Public Key successfully loaded..."); 
+			LOGGER.config("Public Key successfully loaded..."); 
 			
 			Map<String,String> keyPairMap = new HashMap<String,String>();
 			keyPairMap.put(PRIVATE_KEY,Base64.getEncoder().encodeToString(pvtKey.getEncoded()));
@@ -397,7 +397,7 @@ public class KeyStore {
 			jedisClient.hset(KEYPAIR_STORE,keyPairMap);
 			jedisClient.set(KEYPAIR_FLAG, "true");
 			
-			LOGGER.fine("keyPairs generated and stored, KEYPAIR_FLAG set to true for the device");
+			LOGGER.config("keyPairs generated and stored, KEYPAIR_FLAG set to true for the device");
 		}
 	}
 	
@@ -435,7 +435,7 @@ public class KeyStore {
 			actionMap.put("actionId", actionId);
 			actionMap.put("ltt", action.getLastTriggerTime());
 			result = jedisClient.hset(KEY,actionMap);
-			LOGGER.fine("Added action with id - " + actionId + " to Actions Store");
+			LOGGER.config("Added action with id - " + actionId + " to Actions Store");
 		}
 		
 		return result;
@@ -447,7 +447,7 @@ public class KeyStore {
 		Map<String,String> actionMap = jedisClient.hgetAll(KEY);
 		ActionInfo action = null;
 		if(actionMap.size() > 0){
-			LOGGER.fine("Retrieved action with id - " + actionId + " from Actions Store");
+			LOGGER.config("Retrieved action with id - " + actionId + " from Actions Store");
 			action = new ActionInfo(actionMap.get("actionId"),actionMap.get("ltt"));
 		}
 		return action;
@@ -456,14 +456,14 @@ public class KeyStore {
 	//Method to return all actions available in Redis actions store
 	public Set<ActionInfo> getAllActions(){
 		final String keyPattern = ACTION_STORE_PREFIX+"*";
-		LOGGER.fine("Prepared Key Pattern to get all actions: " +keyPattern);
+		LOGGER.config("Prepared Key Pattern to get all actions: " +keyPattern);
 		Set<String> actionKeys = jedisClient.keys(keyPattern);
 		Set<ActionInfo> allActions = new HashSet<ActionInfo>();
 		LOGGER.info("Total actions keys retrieved from Actions Store: " +actionKeys.size());
 		String actionId;
 		for(String actionKey : actionKeys){
 			actionId = actionKey.split("#")[1];
-			LOGGER.fine("Retrieving action details for actionId: " +actionId);
+			LOGGER.config("Retrieving action details for actionId: " +actionId);
 			allActions.add(getAction(actionId));
 		}
 		return allActions;

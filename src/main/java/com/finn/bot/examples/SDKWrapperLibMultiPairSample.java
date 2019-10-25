@@ -24,9 +24,7 @@ import com.finn.bot.store.ActionDTO;
 
 /*
  * Command to execute the SDKWrapperLibSample run method 
- 
- * java -Dbleno.service.path=/home/pi -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar libMultiPairSample
- * java -Dbleno.service.path=/home/pi -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar libMultiPairSample
+ * 		java -Dbleno.service.path=/home/pi -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar libMultiPairSample
 */
 public class SDKWrapperLibMultiPairSample {
 	//Class Logger Instance
