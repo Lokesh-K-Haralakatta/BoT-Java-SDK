@@ -29,9 +29,19 @@
  * To bootstrap the webserver and consume the ReST endpoints, execute the command `java -jar BoT-Java-SDK.jar server`
    - The available end points to consume are /qrcode   /actions   /pairing
    - The server log can be found at the location `/tmp/BoT-Java-SDK-Webserver.log`
- * To run the library sample, run the below command 
-   - `java -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar libSample`
+ * To run the library sample for single pair, 
+   - Update the required fields in the example `SDKWrapperLibSample.java` 
+   - Run the command`java -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar libSample`
    - The log entries for Java SDK can be found in `/tmp/java-sdk.log.*` files
  * To run the library sample with custom path for `bleno-service.js`, run the below command
    - `java -Dbleno.service.path=bleno-directory -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar libSample`
+   - The log entries for Java SDK can be found in `/tmp/java-sdk.log.*` files
+ * To run the library sample for Multi pair, 
+   - Update the required fields in the example `SDKWrapperLibMultiPairSample.java` 
+   - Run the command`java -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar libMultiPairSample`
+   - The log entries for Java SDK can be found in `/tmp/java-sdk.log.*` files
+ * To run the WebServer Sample to consume end points for single pair,
+   - Bootstrap the embed webserver present in Java SDK as explained above
+   - Update the IP Address of the Webserver and other required details in the example `SDKWebServerSample.java`
+   - Run the command `java  -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar serverSample`
    - The log entries for Java SDK can be found in `/tmp/java-sdk.log.*` files
