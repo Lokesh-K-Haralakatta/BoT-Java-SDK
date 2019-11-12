@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.finn.bot.examples.SDKWebServerSample;
 import com.finn.bot.examples.SDKWrapperLibMultiPairSample;
 import com.finn.bot.examples.SDKWrapperLibSample;
 import com.finn.bot.tests.IntegrationTests;
@@ -27,11 +28,24 @@ import com.finn.bot.tests.IntegrationTests;
  * 
  * To use BoT-Java-SDK as library for multi pair device, execute the below command:
  * 				java -Dbleno.service.path=/home/pi -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar libMultiPairSample
+ * 
+ * To consume embed WebServer EndPoints of BoT-Java-SDK for single pair device, execute the below command:
+ * 				java -Dbleno.service.path=/home/pi -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar serverSample
+ * 
+ * 
  */
+
 @SpringBootApplication
 public class SDKMain {
 	//Class Logger Instance
 	private final static Logger LOGGER = Logger.getLogger(SDKMain.class.getName());
+	
+	private static void printUsage() {
+		System.out.println("Default Usage: java -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar [server | tests | libSample | serverSample]");
+		System.out.println("Usage with JVM properties: java -Dbleno.service.path=bleo-service-path "
+				+ " -Djava.util.logging.config.file=logging-properties-file "
+				+ " -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar [server | tests | libSample | serverSample]");		
+	}
 	
 	public static void main(String[] args) {
 		if(args.length == 1)
@@ -49,13 +63,11 @@ public class SDKMain {
 						  	  break;
 				case "libSample": SDKWrapperLibSample.run(); break;
 				case "libMultiPairSample" : SDKWrapperLibMultiPairSample.run(); break;
-				case "serverSample": System.out.println("Given Option is to run Server Sample"); break;
+				case "serverSample": SDKWebServerSample.run(); break;
+				default: printUsage();
 			}
 		else {
-			System.out.println("Default Usage: java -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar [server | tests | libSample | serverSample]");
-			System.out.println("Usage with JVM properties: java -Dbleno.service.path=bleo-service-path "
-					+ " -Djava.util.logging.config.file=logging-properties-file "
-					+ " -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar [server | tests | libSample | serverSample]");
+			printUsage();
 		}
 	}
 }
