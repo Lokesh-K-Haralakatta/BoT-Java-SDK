@@ -85,7 +85,8 @@ public class BLEService {
 		//Check the existence of the bleno service file at prepared path
 		if(!Files.exists(Paths.get(blenoServicePath))){
 			LOGGER.severe("Invalid BLENO SERVICE Path: " + blenoServicePath);
-			return;
+			LOGGER.severe("Quitting Now... Please check and run again");
+			System.exit(-1);
 		}
 		
 		//Build the required arguments for bleno service
