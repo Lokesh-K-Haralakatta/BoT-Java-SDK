@@ -1,6 +1,7 @@
 package com.finn.bot;
 /*
-SDKMain.java - Java SDK Starting Point to bootstrap the Webserver end points for end user to consume
+SDKMain.java - Java SDK Starting Point to bootstrap the Webserver end points for end user to consume the provided end points
+and also to execute the built-in java samples to use Java-SDK as library as well as through embed webserver end points.
 Created by Lokesh H K, October 03, 2019.
 Released into the repository BoT-Java-SDK.
 */
@@ -10,6 +11,7 @@ import java.util.logging.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.finn.bot.examples.SDKWebServerMultiPairSample;
 import com.finn.bot.examples.SDKWebServerSample;
 import com.finn.bot.examples.SDKWrapperLibMultiPairSample;
 import com.finn.bot.examples.SDKWrapperLibSample;
@@ -30,9 +32,10 @@ import com.finn.bot.tests.IntegrationTests;
  * 				java -Dbleno.service.path=/home/pi -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar libMultiPairSample
  * 
  * To consume embed WebServer EndPoints of BoT-Java-SDK for single pair device, execute the below command:
- * 				java -Dbleno.service.path=/home/pi -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar serverSample
+ * 				java -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar serverSample
  * 
- * 
+ * * To consume embed WebServer EndPoints of BoT-Java-SDK for multi pair device, execute the below command:
+ * 				java -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar serverMultiPairSample
  */
 
 @SpringBootApplication
@@ -64,6 +67,7 @@ public class SDKMain {
 				case "libSample": SDKWrapperLibSample.run(); break;
 				case "libMultiPairSample" : SDKWrapperLibMultiPairSample.run(); break;
 				case "serverSample": SDKWebServerSample.run(); break;
+				case "serverMultiPairSample": SDKWebServerMultiPairSample.run(); break;
 				default: printUsage();
 			}
 		else {

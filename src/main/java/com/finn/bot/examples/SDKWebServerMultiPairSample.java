@@ -1,7 +1,7 @@
 package com.finn.bot.examples;
 /*
-SDKWebServerSample - Java Sample Application to show case the consumption of embed WebServer end points for single pair
-Created by Lokesh H K, November 12, 2019.
+SDKWebServerMultiPairSample - Java Sample Application to show case the consumption of embed WebServer end points for multi pair device
+Created by Lokesh H K, November 13, 2019.
 Released into the repository BoT-Java-SDK.
 */
 
@@ -40,23 +40,24 @@ import com.google.zxing.WriterException;
  */
 
 /*
- * Command to execute the SDKWebServerSample run method 
- * 		java -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar serverSample
+ * Command to execute the SDKWebServerMultiPairSample run method 
+ * 		java -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar serverMultiPairSample
 */
-public class SDKWebServerSample {
+
+public class SDKWebServerMultiPairSample {
 	//Class Logger Instance
-	private final static Logger LOGGER = Logger.getLogger(SDKWebServerSample.class.getName());
+	private final static Logger LOGGER = Logger.getLogger(SDKWebServerMultiPairSample.class.getName());
 	
 	//Default SDK Log file path
 	private final static String logFile = "/tmp/java-sdk.log.*";
 	
 	//Static constants
 	private final static String makerId = "469908A3-8F6C-46AC-84FA-4CF1570E564B";
-	private final static String deviceName = "SDKWebServerSample-"+getRandomIntegerBetweenRange(1,100);
+	private final static String deviceName = "SDKWebServerMultiPairSample-1";
 	private final static String actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
 	private final static Boolean generateDeviceId = true;
-	private final static Boolean deviceMultiPair = false;
-	private final static String alternateDeviceId = null;
+	private final static Boolean deviceMultiPair = true;
+	private final static String alternateDeviceId = "SDKWebServerMP-1";
 	private final static Integer actionTriggerInterval = 5 * 60 * 1000;
 	private final static String actionsEndpoint = "/actions";
 	private final static String pairingEndpoint = "/pairing";
@@ -67,7 +68,7 @@ public class SDKWebServerSample {
 	
 	//Payments counters
 	private static Integer actionTriggerSucceeded = 0;
-	private static Integer actionTriggerFailed = 0;
+	private static Integer actionTriggerFailed = 0;	
 	
 	//Configuration Service Instance
 	private static ConfigurationService configService = ConfigurationService.getConfigurationServiceInstance();
@@ -141,12 +142,6 @@ public class SDKWebServerSample {
 		
 		return responseBody;
 	}
-
-	//Method to provide a random number in the given range
-	private static int getRandomIntegerBetweenRange(double min, double max){
-	    int x = (int) ((Math.random()*((max-min)+1))+min);
-	    return x;
-	}
 	
 	//Static Method to pair and activate the device
 	private static boolean pairAndActivateDevice(final String makerId, final String deviceName, 
@@ -156,20 +151,22 @@ public class SDKWebServerSample {
 		
 		String url = baseUrl+qrcodeEndpoint;
 		Boolean devicePaired = false;
-		if(keyStore.getDeviceState() != KeyStore.DEVICE_INVALID && keyStore.getDeviceState() >= KeyStore.DEVICE_ACTIVE){
-			LOGGER.info("Device is already paired/activated OR Multipair device");
+		if(keyStore.getDeviceState() != KeyStore.DEVICE_INVALID && keyStore.getDeviceState() == KeyStore.DEVICE_MULTIPAIR){
+			LOGGER.info("Device is Multipair device");
 			devicePaired = true;
 		}
 		else {
 			LOGGER.info("Device is not paired yet, proceeding with device initialization, pairing and configuration");
 			configService.initializeDeviceConfiguration(makerId, deviceName, generateDeviceId, deviceMultiPair, alternateDeviceId);
 			LOGGER.info("Access QrCode for the device from URL: " + url + " and Pair using FINN Mobile Application");
-			devicePaired = getPairingStatus().contains("Device pairing successful");
+			String pairingResponse = getPairingStatus();
+			devicePaired = pairingResponse.contains("Device pairing successful") || pairingResponse.contains("Device is Multipair");
 		}
 		
 		return devicePaired;
 	}
-
+	
+	
 	//Static Method to trigger action using /actions end point
 	private static Boolean triggerAction(final String actionString) throws IOException{
 		String responseBody = null;
@@ -209,9 +206,8 @@ public class SDKWebServerSample {
 		
 		return triggerResult;
 	}
-	
 	public static void run() {
-		LOGGER.info("Running SDKWebServerSample...");
+		LOGGER.info("Running SDKWebServerMultipairSample...");
 		try {
 			
 			//Reset Device Configuration only if needed otherwise comment below 4 lines of code
@@ -248,4 +244,5 @@ public class SDKWebServerSample {
 			LOGGER.severe(ExceptionUtils.getStackTrace(e));
 		}
 	}
+			
 }
