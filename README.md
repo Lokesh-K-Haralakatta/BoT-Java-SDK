@@ -20,8 +20,8 @@
  * Execute the command `mvn clean package`
  * On successful build completion, find `BoT-Java-SDK.jar` in the path `BoT-Java-SDK/target`
  
- ## Execution
- * We need below given prerequisite setup files to be copied to the directory from where needs to be `BoT-Java-SDK.jar`
+ ## Built-in WebServer and Java Samples Execution
+ * We need below given prerequisite setup files to be copied to the directory from where `BoT-Java-SDK.jar` to be executed
    - Copy `logback.xml` from the path `BoT-Java-SDK/src/main/resources` to the execution directory
    - Copy `bleno-service.js` from the path `BoT-Java-SDK/src/main/resources` to the execution directory
    - Copy `logging.properties` from the path `BoT-Java-SDK/src/main/resources` to the execution directory
@@ -44,4 +44,9 @@
    - Bootstrap the embed webserver present in Java SDK as explained above
    - Update the IP Address of the Webserver and other required details in the example `SDKWebServerSample.java`
    - Run the command `java  -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar serverSample`
+   - The log entries for Java SDK can be found in `/tmp/java-sdk.log.*` files
+ * To run the WebServer Sample to consume end points for multi pair,
+   - Bootstrap the embed webserver present in Java SDK as explained above
+   - Update the IP Address of the Webserver and other required details in the example `SDKWebServerMultiPairSample.java`
+   - Run the command `java  -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar serverMultiPairSample`
    - The log entries for Java SDK can be found in `/tmp/java-sdk.log.*` files
