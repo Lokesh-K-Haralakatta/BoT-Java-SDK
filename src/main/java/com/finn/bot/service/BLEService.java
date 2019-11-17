@@ -34,6 +34,9 @@ public class BLEService {
 	//Default path to bleno-service.js script
 	private static final String BLENO_SERVICE_JS_FILE = "bleno-service.js";
 	
+	//Member to hold complete bleno-service details
+	private String blenoCmdString = "";
+	
 	//Make constructor as Private
 	private BLEService(){}
 	
@@ -72,10 +75,42 @@ public class BLEService {
 		return new PrintBLENOServiceOutput(is, type);
 	}
 	
-	//Method to start BLENO Service as process
-	public void executeBLENOService() throws InterruptedException{
-		Runtime rt = Runtime.getRuntime();
-		PrintBLENOServiceOutput errorMessageThread, outputMessageThread;
+	//Private class to execute BLENO Process on separate thread
+	private class BLENOProcessThread extends Thread {
+		public void run() {
+			Runtime rt = Runtime.getRuntime();
+			PrintBLENOServiceOutput errorMessageThread, outputMessageThread;
+			
+			if(blenoCmdString != null) {
+				LOGGER.config("BLENO Service Command String: " + blenoCmdString);
+			
+			    try {
+			    	Process proc = rt.exec(blenoCmdString);
+			    	errorMessageThread = getStreamWrapper(proc.getErrorStream(), "ERROR");
+			    	outputMessageThread = getStreamWrapper(proc.getInputStream(), "OUTPUT");
+			    	errorMessageThread.start();
+			    	outputMessageThread.start();
+			    	do {
+			    		Thread.sleep(5000);
+			    		if(pairingService.isDevicePaired()){
+			    			LOGGER.config("Device paired, stopping bleno-service.js");
+			    			proc.destroyForcibly();
+			    			break;
+			    		}
+			    		else {
+			    			LOGGER.info("Waiting for device to be paired through BLE Service");
+			    		}
+			    	}while(proc.isAlive());
+			    	LOGGER.info(" bleno-service.js process Execution Completed");
+			    } catch (Exception e) {
+			    	LOGGER.severe("Exception caught duirng execution of bleno-service.js");
+			    	LOGGER.severe(ExceptionUtils.getStackTrace(e));
+			    }
+			}
+		}
+	}
+	//Method to start BLENO Service as process on separate thread
+	public void executeBLENOService() throws InterruptedException {
 		//Extract / prepare the bleno service java script to be executed
 		String blenoServicePath = System.getProperty("bleno.service.path", BLENO_SERVICE_JS_FILE);
 		if(blenoServicePath != null && !blenoServicePath.contains(BLENO_SERVICE_JS_FILE)){
@@ -96,29 +131,10 @@ public class BLEService {
 			blenoArgs += "1" + " " + keyStore.getDeviceAltId();
 		}
 		
-		String blenoCmdString = "node" + " " + blenoServicePath + " " + blenoArgs;
-		LOGGER.config("BLENO Service Command String: " + blenoCmdString);
-		try {
-			Process proc = rt.exec(blenoCmdString);
-			errorMessageThread = getStreamWrapper(proc.getErrorStream(), "ERROR");
-			outputMessageThread = getStreamWrapper(proc.getInputStream(), "OUTPUT");
-			errorMessageThread.start();
-			outputMessageThread.start();
-			do {
-				Thread.sleep(5000);
-				if(pairingService.isDevicePaired()){
-					LOGGER.config("Device paired, stopping bleno-service.js");
-					proc.destroyForcibly();
-					break;
-				}
-				else {
-					LOGGER.info("Waiting for device to be paired through BLE Service");
-				}
-			}while(proc.isAlive());
-			LOGGER.config(blenoServicePath + " Execution Completed");
-		} catch (IOException e) {
-			LOGGER.severe("Exception caught duirng execution of bleno-service.js");
-			LOGGER.severe(ExceptionUtils.getStackTrace(e));
-		}
+		blenoCmdString = "sudo node" + " " + blenoServicePath + " " + blenoArgs;
+		LOGGER.info("Starting bleno-service as seaparate process on separate thread...");
+		BLENOProcessThread blenoserviceThread = new BLENOProcessThread();
+		blenoserviceThread.start();
+		blenoserviceThread.join();
 	}
 }

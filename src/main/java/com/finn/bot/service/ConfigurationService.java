@@ -42,6 +42,11 @@ public class ConfigurationService {
 		final boolean generateDeviceID, final boolean isMultiPair, final String alternateID) throws NoSuchProviderException, NoSuchAlgorithmException,
 	    InvalidKeySpecException, CertificateException, IOException, WriterException{
 		
+		if(makerID == null || makerID.length() == 0) {
+			LOGGER.severe("Maker ID cannot be null!!!");
+			System.exit(1);
+		}
+		
 		LOGGER.config("Initializing the device with makerID: "+makerID);
 		keyStore.setMakerId(makerID);
 		
