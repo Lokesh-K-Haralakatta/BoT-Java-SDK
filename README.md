@@ -1,6 +1,8 @@
+![readme-header](readme-header.png)
+
 # BoT-Java-SDK
     Finn BoT SDK to interact with Banking of things Service using Java programming language to enable 
-    IoT devices with autonomous payments.
+    IoT devices with autonomous payments. For more information, visit us at our website https://makethingsfinn.com/
     
 ## Prerequisites
 * **Hardware Devices**
@@ -13,14 +15,42 @@
   - [Redis](https://redis.io/)
   - [Node JS](https://nodejs.org/en/)
   - [Git](https://projects.raspberrypi.org/en/projects/getting-started-with-git/4)
-  
- ## Build
+ 
+ ## Getting Started with SDK on Raspberry Pi Zero as Standalone Server
+ * Setup [Raspberry Pi Zero](https://www.raspberrypi.org/products/raspberry-pi-zero-w/)
+ * Get SDK Source from [BoT-Java-SDK](https://github.com/BankingofThings/BoT-Java-SDK/tree/master) Repository using git clone    / downloading the zip
+ * Go to BoT-Java-SDK directory and perform below steps in sequence to setup the sdk
+   - Install all required prequisite packages by executing the command `make install`
+   - Download and Install [FINN Mobile App](https://docs.bankingofthings.io/mobile-app)
+   - Configure the device by executing the command `make configure`
+   - Pair the device with the [FINN Mobile App](https://docs.bankingofthings.io/mobile-app) using BLE Feature
+   - Start the embed webserver present in sdk by executing the command `make startServer`
+   - We can also pair the device using the `/qrcode` end point exposed by the webserver with the [FINN Mobile App](https://docs.bankingofthings.io/mobile-app)
+ * Define the required payment action at [Maker Portal](https://maker.bankingofthings.io/login)
+ * Add Service to paired device on [FINN Mobile App](https://docs.bankingofthings.io/mobile-app)
+ * Retrieve Actions from Maker Portal by accessing the `/actions` endpoint exposed by the webserver
+ * To trigger the payment, post an action by accessing the `/actions` endpoint with Json data having actionId as given below
+   - curl -d '{"actionID":"DEFINED_ACTION_ID"}' -H "Content-Type: application/json" -X POST http://server-ip:3001/actions
+ * Stop the webserver by executing the command `stopServer`
+ * SDK also had got the feature to reset the device configuration by executing the command `make reset`
+ * For all the above described steps, the default log files location is `/tmp/java-sdk-*.log`
+ 
+ ## Getting Started with SDK as a Java Library
+ ### Build the BoT-Java-SDK Jar
  * Clone the project using `git` or Download the BoT-Java-SDK.zip and extract
  * Go to BoT-Java-SDK directory
  * Execute the command `mvn clean package`
  * On successful build completion, find `BoT-Java-SDK.jar` in the path `BoT-Java-SDK/target`
  
- ## Built-in WebServer and Java Samples Execution
+ ### Consume the BoT-Java-SDK Jar as Java Library
+ * Include `BoT-Java-SDK.jar` in the classpath
+ * SDK provides below listed APIs as part of SDKWrapper Class to be used in Java Application
+   - Pair and Activate the IoT Device for autonomous payments - `SDKWrapper.pairAndActivateDevice`
+   - Trigger an autonomous payment - `SDKWrapper.triggerAction`
+   - Reset the device configuration - `SDKWrapper.resetDeviceConfiguration`
+ * For complete details on using BoT-Java-SDK as Java Library, refer to built-in examples available in examples package
+ 
+ ### Built-in WebServer and Java Samples Execution
  * We need below given prerequisite setup files to be copied to the directory from where `BoT-Java-SDK.jar` to be executed
    - Copy `logback.xml` from the path `BoT-Java-SDK/src/main/resources` to the execution directory
    - Copy `bleno-service.js` from the path `BoT-Java-SDK/src/main/resources` to the execution directory
