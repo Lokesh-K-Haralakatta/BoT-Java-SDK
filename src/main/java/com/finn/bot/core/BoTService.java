@@ -63,12 +63,16 @@ public class BoTService {
 	private static BoTService instance = new BoTService();
 	
 	//BoT Service related constants
-	private final static String HOST = "api-dev.bankingofthings.io";
+	private final static String HOST = "iot-dev.bankingofthings.io"; 
+	//private final static String URI = "";
+	//private final static String HOST = "api-dev.bankingofthings.io";
 	private final static String URI = "/bot_iot";
 	
 	//Root CA SSL Finger Print Values
-	private final static String ROOT_CA_FP_SHA1 = "3ea22bbffb38a6769a30d6951bf0a9bb9a847dd6";
-	private final static String ROOT_CA_FP_SHA256 = "85763f1dfffde3791e52ce50776b7b50a15ae0f06a804819eca97ab22ce349b5";
+	private final static String ROOT_CA_FP_SHA1 = "76e6b6df6d3b4d2d48d1b632add68e80533f5f88"; 
+	private final static String ROOT_CA_FP_SHA256 = "56785dc285744405dca2dc37c8660ee591dfc73a7def24c4f3416250ac83e0b9";
+	//private final static String ROOT_CA_FP_SHA1 = "3ea22bbffb38a6769a30d6951bf0a9bb9a847dd6";
+	//private final static String ROOT_CA_FP_SHA256 = "85763f1dfffde3791e52ce50776b7b50a15ae0f06a804819eca97ab22ce349b5";
 	
 	//Flag to enable or disable HTTP Secure Communication
 	private static Boolean https = true;

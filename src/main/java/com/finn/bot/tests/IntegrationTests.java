@@ -486,12 +486,12 @@ public class IntegrationTests {
 		//testDeviceActivation();
 		//testGetActions();
 		//testTriggerAction();
-		//testDeviceConfiguration();
+		testDeviceConfiguration();
 		//testBlenoService();
 		//testBlenoServiceMultiPair();
 		//testBlenoServiceWithPairedDevice();
 		//testSDKWrapperMethods();
 		//testSDKWrapperPairActivateMultiPair();
-		testSDKWrapperTriggerAction();
+		//testSDKWrapperTriggerAction();
 	}
 }
