@@ -7,10 +7,11 @@
 ## Supported Features
    | Sl. No        | SDK Feature                                | Status      | Remarks |
    | :-----------: |:-------------------------------------------| :-----------| :-------|
-   |        1      | Pairing through Bluetooth Low Energy (BLE) | :heavy_check_mark: | Supported in Library Mode |
-   |        2      | Pairing through QR Code                    | :heavy_check_mark: | Supported only in Webserver mode through end point /qrcode to get generated QRCode for device to be paired |
-   |        3      | Secured HTTP with BoT Service              | :heavy_check_mark: | Supported for all interactions with backend server |
-   |        4      | Logging                                    | :heavy_check_mark: | Supported with Java Util Logging for SDK and Springboot logging for Webserver. Default log path is /tmp.|
+   |        1      | Pairing through Bluetooth Low Energy (BLE) | :thumbsup: | Supported in Library Mode |
+   |        2      | Pairing through QR Code                    | :thumbsup: | Supported only in Webserver mode through end point /qrcode to get generated QRCode for device to be paired |
+   |        3      | Secured HTTP with BoT Service              | :thumbsup: | Supported for all interactions with backend server |
+   |        4      | Logging                                    | :thumbsup: | Supported with Java Util Logging for SDK and Springboot logging for Webserver. Default log path is /tmp.|
+   |        5      | Offline Actions                            | :thumbsdown: | Supported with Java Util Logging for SDK and Springboot logging for Webserver. Default log path is /tmp.|
    
 ## Prerequisites
 * **Hardware Devices**
@@ -23,25 +24,37 @@
   - [Redis](https://redis.io/)
   - [Node JS](https://nodejs.org/en/)
   - [Git](https://projects.raspberrypi.org/en/projects/getting-started-with-git/4)
+  
+  **Note:** Make sure the above listed tools are already available for the systems running Mac OS, Linux and Windows. For Raspberry Pi Zero, the install script `make install` takes care of installing all required software tools.
  
- ## Getting Started with SDK on Raspberry Pi Zero as Standalone Server
+ ## [Maker Portal](https://maker.bankingofthings.io/login)
+ * Login to [Maker Portal](https://maker.bankingofthings.io/login) with GitHub Account
+ * Define the required payment action at [Maker Portal](https://maker.bankingofthings.io/login) under `Statistics -> Actions -> CREATE SERVICE PAYMENT`
+ * Make note of `makerID` and `actionID` to be used in below following sections
+   
+ ## [FINN Mobile Application](https://docs.bankingofthings.io/mobile-app)
+ * Download and Install [FINN Mobile App](https://docs.bankingofthings.io/mobile-app)
+ * Signup / Signin to FINN Mobile Application using the magic link on mobile phone
+ 
+ ## Getting Started with Java SDK on [Raspberry Pi Zero](https://www.raspberrypi.org/products/raspberry-pi-zero-w/) as Standalone Server
  * Setup [Raspberry Pi Zero](https://www.raspberrypi.org/products/raspberry-pi-zero-w/)
- * Get SDK Source from [BoT-Java-SDK](https://github.com/BankingofThings/BoT-Java-SDK/tree/master) Repository using git clone    / downloading the zip
+ * Get SDK Source from [BoT-Java-SDK](https://github.com/BankingofThings/BoT-Java-SDK/tree/master) Repository using git clone / downloading the zip
+   - Install Git using the command `apt-get install git` if it's not available on Raspbian
  * Go to BoT-Java-SDK directory and perform below steps in sequence to setup the sdk
    - Install all required prequisite packages by executing the command **`make install`**
-   - Download and Install [FINN Mobile App](https://docs.bankingofthings.io/mobile-app)
    - Configure the device by executing the command **`make configure`**
    - Pair the device with the [FINN Mobile App](https://docs.bankingofthings.io/mobile-app) using BLE Feature
+     - Login to FINN Mobile Application and search for BLE Device to pair
    - Start the embed webserver present in sdk by executing the command **`make startServer`**
+     - After successful server start, it displays the base url. Make note of IP Address
    - We can also pair the device using the **`/qrcode`** end point exposed by the webserver with the [FINN Mobile App](https://docs.bankingofthings.io/mobile-app)
- * Define the required payment action at [Maker Portal](https://maker.bankingofthings.io/login)
- * Add Service to paired device on [FINN Mobile App](https://docs.bankingofthings.io/mobile-app)
- * Retrieve Actions from Maker Portal by accessing the **`/actions`** endpoint exposed by the webserver
- * To trigger the payment, post an action by accessing the **`/actions`** endpoint with Json data having actionId as given below
-   - curl -d '{"actionID":"DEFINED_ACTION_ID"}' -H "Content-Type: application/json" -X POST http://server-ip:3001/actions
- * Stop the webserver by executing the command **`make stopServer`**
- * SDK also had got the feature to reset the device configuration by executing the command **`make reset`**
- * For all the above described steps, the default log files location is **`/tmp/java-sdk-*.log`**
+   - Add Service to paired device on [FINN Mobile App](https://docs.bankingofthings.io/mobile-app)
+   - Retrieve Actions from Maker Portal by accessing the **`/actions`** endpoint exposed by the webserver
+   - To trigger the payment, post an action by accessing the **`/actions`** endpoint with Json data having actionId as given below and replace the `server-ip` with the actual IP Address collected from base url above
+       - curl -d '{"actionID":"DEFINED_ACTION_ID"}' -H "Content-Type: application/json" -X POST http://server-ip:3001/actions
+   - Stop the webserver by executing the command **`make stopServer`**
+   - SDK also had got the feature to reset the device configuration by executing the command **`make reset`** when it's no longer needed
+   - For all the above described steps, the default log files location is **`/tmp/java-sdk-*.log`**
  
  ## Getting Started with SDK as a Java Library
  ### Build the BoT-Java-SDK Jar
