@@ -128,10 +128,11 @@ public class SDKMain {
 				case "libMultiPairSample" : SDKWrapperLibMultiPairSample.run(); break;
 				case "serverSample": SDKWebServerSample.run(); break;
 				case "serverMultiPairSample": SDKWebServerMultiPairSample.run(); break;
-				default: printUsage();
+				default: printUsage(); System.exit(1);
 			}
 		else {
 			printUsage();
+			System.exit(1);
 		}
 	}
 }

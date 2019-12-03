@@ -44,7 +44,7 @@ const CONFIGURE_CHARACTERISTIC_UUID = "32BEAA1B-D20B-47AC-9385-B243B8071DE4"
 bleno.on('stateChange', function(state) {
     console.log('State change: ' + state);
     if (state === 'poweredOn') {
-        bleno.startAdvertising('Java-SDK-BLE-Service',[SERVICE_UUID]);
+        bleno.startAdvertising(deviceName,[SERVICE_UUID]);
     } else {
         bleno.stopAdvertising();
     }

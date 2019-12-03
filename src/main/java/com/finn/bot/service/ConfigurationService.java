@@ -53,6 +53,7 @@ public class ConfigurationService {
 		if(!keyStore.isKeyPairGenerated()){
 			LOGGER.config("Generating the key-pair for the device");
 			keyStore.generateAndStoreKeyPair(true);
+			keyStore.clearQrCode();
 		}
 		
 		//Handle deviceID for the device

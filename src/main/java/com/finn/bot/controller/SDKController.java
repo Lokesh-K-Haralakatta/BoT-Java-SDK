@@ -41,6 +41,15 @@ public class SDKController {
 		return false;
 	}
 	
+	@RequestMapping(value = "/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<String> getSupportedEndPoints() {
+
+      return ResponseEntity
+                .ok()
+                .contentType(MediaType.TEXT_PLAIN)
+                .body("BoT-Java-SDK Webserver: \n Supported End Points: /qrcode \t /actions \t /pairing ");
+    }
+    
     @RequestMapping(value = "/qrcode", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<byte[]> getQRCodeBytes() {
 
