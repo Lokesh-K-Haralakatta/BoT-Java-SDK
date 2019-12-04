@@ -76,16 +76,15 @@ public class ConfigurationService {
 		LOGGER.config("DeviceName set to: " +keyStore.getDeviceName());
 		
 		//Handle device pair type and set device state accordingly
+		keyStore.setDeviceState(KeyStore.DEVICE_NEW);
 		if(isMultiPair){
-			keyStore.setDeviceState(KeyStore.DEVICE_MULTIPAIR);
 			if(alternateID != null)
 				keyStore.setDeviceAltId(alternateID);
 			else
 				keyStore.setDeviceAltId("altID");
+			keyStore.setDeviceState(KeyStore.DEVICE_MULTIPAIR);
 			LOGGER.config("Device enabled for multipair with alternate deviceID: " + keyStore.getDeviceAltId());
 		}
-		else
-			keyStore.setDeviceState(KeyStore.DEVICE_NEW);
 		LOGGER.config("Device State set to " + keyStore.getDeviceState(keyStore.getDeviceState()));
 		
 		//Generate QRCode for the device if needed

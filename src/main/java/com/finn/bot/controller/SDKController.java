@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.finn.bot.service.ActionService;
+import com.finn.bot.service.ActivationService;
 import com.finn.bot.service.PairingService;
 import com.finn.bot.store.ActionDTO;
 import com.finn.bot.store.KeyStore;
@@ -47,7 +48,7 @@ public class SDKController {
       return ResponseEntity
                 .ok()
                 .contentType(MediaType.TEXT_PLAIN)
-                .body("BoT-Java-SDK Webserver: \n Supported End Points: /qrcode \t /actions \t /pairing ");
+                .body("BoT-Java-SDK Webserver: \n Supported End Points: /qrcode \t /actions \t /pairing \t /activate");
     }
     
     @RequestMapping(value = "/qrcode", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
@@ -90,6 +91,46 @@ public class SDKController {
     						.badRequest()
     						.contentType(MediaType.TEXT_PLAIN)
     						.body("Unable to pair device");
+    			}
+    		}
+    		catch(Exception e){
+    			return ResponseEntity
+    					.badRequest()
+    					.contentType(MediaType.TEXT_PLAIN)
+    					.body(ExceptionUtils.getStackTrace(e));
+    		}
+    	}
+    }
+    
+    @RequestMapping(value = "/activate", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<String> activateDevice(){
+    	if(KeyStore.getKeyStoreInstance().getDeviceState() != KeyStore.DEVICE_INVALID
+    			&& KeyStore.getKeyStoreInstance().getDeviceState() >= KeyStore.DEVICE_ACTIVE){
+    		return ResponseEntity
+    				.badRequest()
+    				.contentType(MediaType.TEXT_PLAIN)
+    				.body("Device is already activated OR Device is Multipair");
+    	}
+    	else if(KeyStore.getKeyStoreInstance().getDeviceState() < KeyStore.DEVICE_PAIRED){
+    		return ResponseEntity
+    				.badRequest()
+    				.contentType(MediaType.TEXT_PLAIN)
+    				.body("Device is not paired yet, try pairing the device first, then activate");
+    	}
+    	else {
+    		try {
+    			ActivationService.getActivationServiceInstance().activateDevice();
+    			if(KeyStore.getKeyStoreInstance().getDeviceState() > KeyStore.DEVICE_PAIRED){
+    				return ResponseEntity
+    						.ok()
+    						.contentType(MediaType.TEXT_PLAIN)
+    						.body("Device activation for autonomous payments successful");
+    			}
+    			else {
+    				return ResponseEntity
+    						.badRequest()
+    						.contentType(MediaType.TEXT_PLAIN)
+    						.body("Unable to activate device for autonomous payments");
     			}
     		}
     		catch(Exception e){

@@ -38,21 +38,6 @@ public class PairingService {
 		return instance;
 	}
 	
-	//Method to check whether the device is multi pair enabled or not
-	private Boolean isDeviceMaultipair(){
-		return keyStore.getDeviceState() == KeyStore.DEVICE_MULTIPAIR;
-	}
-	
-	//Method to check whether the device is pairable or not
-	private Boolean isDevicePairable(){
-		if(isDeviceMaultipair()){
-			LOGGER.config("Devicve is MultiPair Enabled");
-			return true;
-		}
-		
-		return keyStore.getDeviceState() == KeyStore.DEVICE_NEW;
-	}
-	
 	//Method to check whether the device has pair status as true or not with BoT Service
 	public Boolean isDevicePaired(){
 		Boolean pairingStatus = false;
@@ -87,16 +72,23 @@ public class PairingService {
 	//Method to check whether the device can be pair able or not
 	//Poll the pairing status max number of tries from BoT Service and
 	//Set Device state to paired and pass on the control to activate the device
-	public synchronized void pairDevice() throws InterruptedException{
-		if(!this.isDevicePairable() || this.isDeviceMaultipair()){
+	public synchronized void pairDevice() throws InterruptedException {
+		if(keyStore.getDeviceState() != KeyStore.DEVICE_INVALID &&
+				keyStore.getDeviceState() >= KeyStore.DEVICE_ACTIVE){
 			LOGGER.config("Device is already paired and activated OR Device is Multipair");
 			return;
 		}
 		
 		if(pollPairingStatus()){
-			keyStore.setDeviceState(KeyStore.DEVICE_PAIRED);
-			LOGGER.config("Device successfully paired, Activating Device ...");
-			ActivationService.getActivationServiceInstance().activateDevice();
+			if(keyStore.getDeviceAltId() != null) {
+				keyStore.setDeviceState(KeyStore.DEVICE_MULTIPAIR);
+				LOGGER.config("Device is multi-pair enabled Device ...");
+			}
+			else {
+			   keyStore.setDeviceState(KeyStore.DEVICE_PAIRED);
+			   LOGGER.config("Device successfully paired, Activating Device ...");
+			   ActivationService.getActivationServiceInstance().activateDevice();
+			}
 		}
 		else {
 			LOGGER.config("Device Not Paired with in given max number tries");

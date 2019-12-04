@@ -284,7 +284,7 @@ public class BoTService {
 			HttpPost httpPost = new HttpPost(completeURL);
 			
 			//Prepare body for POST Call
-			String signedToken = signPayload(actionId);
+			String signedToken = endPoint.equalsIgnoreCase("/actions")?signPayload(actionId):signPayload(endPoint);
 			PostBodyItem body = new PostBodyItem(signedToken);
 			String bodyStr = jsonObject.toJson(body);
 			LOGGER.config("Prepared body contents for POST Call: "+bodyStr);

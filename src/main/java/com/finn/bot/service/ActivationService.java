@@ -42,7 +42,7 @@ public class ActivationService {
 	private Boolean isDeviceActivated(){
 		Boolean activationStatus = false;
 		try {
-				String response = bot.get(ActivationService.BoT_EndPoint);
+				String response = bot.post(ActivationService.BoT_EndPoint,null);
 				activationStatus = (response != null && response.equals(""))? true : false;
 		}
 		catch(Exception e){

@@ -68,7 +68,7 @@ public class SDKMain {
 	}
 	
 	public static void main(String[] args) {
-		final String [] endPoints = { "	/qrcode ", " /actions ", " /pairing " };
+		final String [] endPoints = { "	/qrcode ", " /actions ", " /pairing ", " /activate " };
 		String makerId = "";
 		String deviceName = "BoT-Device-"+getRandomIntegerBetweenRange(1,100);
 		Boolean generateDeviceId = true;

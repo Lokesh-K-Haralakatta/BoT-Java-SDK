@@ -43,7 +43,7 @@ echo $redisRunning | tee -a $logFile
 
 ## Collect required configuration details from the user
 echo "Provide below required configuration details: " | tee -a $logFile
-echo "Maker ID: \c" ; read makerId
+echo "Maker ID, get from maker portal https://maker.bankingofthings.io/account : \c" ; read makerId
 echo "Maker ID: $makerId" | tee -a $logFile
 
 if [ -z "$makerId" ] ; then
@@ -51,10 +51,10 @@ if [ -z "$makerId" ] ; then
   exit 1
 fi
 
-echo "Device Name: \c" ; read deviceName
+echo "Device Name to label the device on FINN APP and maker portal: \c" ; read deviceName
 echo "DeviceName: $deviceName" | tee -a $logFile
 
-echo "Generate DeviceId [Y/N] : \c" ; read generateId
+echo "Generate DeviceId - UUID4 string to uniquely identify the device for payments [Y/N] : \c" ; read generateId
 if [ $generateId = 'Y' -o $generateId = 'y' ] ; then
   generateId="true"
 else
@@ -62,19 +62,19 @@ else
 fi
 echo "Generate DeviceId: $generateId" | tee -a $logFile
 
-echo "Multipair Device [Y/N] : \c" ; read multiPair
+echo "Multipair Device - Allows the device to have multiple alternative names [Y/N] : \c" ; read multiPair
 if [ $multiPair = 'Y' -o $multiPair = 'y' ] ; then
   multiPair="true"
-  echo "Alternate Device ID: \c" ; read altId
+  echo "Alternative Device ID - Alternative name for multipair device : \c" ; read altId
   if [ -z "$altId" ] ; then
-    echo "Multipair Device, Alternate ID cannot be null, Exiting..." | tee -a $logFile
+    echo "Multipair Device, Alternative ID cannot be null, Exiting..." | tee -a $logFile
     exit 1
   fi
 else
   multiPair="false"
 fi
 echo "Multipair Device: $multiPair" | tee -a $logFile
-echo "Device Alternate Id: $altId" | tee -a $logFile
+echo "Device Alternative Id: $altId" | tee -a $logFile
 
 ## Invoke BoT-Java-SDK config option to configure and activate the device
 sdkJarPath="target/BoT-Java-SDK.jar"
