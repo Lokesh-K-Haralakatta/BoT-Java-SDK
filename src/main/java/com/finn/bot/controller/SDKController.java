@@ -71,7 +71,14 @@ public class SDKController {
     
     @RequestMapping(value = "/pairing", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> pairDevice(){
-    	if(KeyStore.getKeyStoreInstance().getDeviceState() > KeyStore.DEVICE_NEW){
+    	if(KeyStore.getKeyStoreInstance().getDeviceState() == KeyStore.DEVICE_INVALID){
+    		return ResponseEntity
+    				.badRequest()
+    				.contentType(MediaType.TEXT_PLAIN)
+    				.body("Device is not configured, configure device first!!!");
+    	}
+    	else if(KeyStore.getKeyStoreInstance().getDeviceState() > KeyStore.DEVICE_NEW &&
+    			PairingService.getPairingServiceInstance().isDevicePaired()){
     		return ResponseEntity
     				.badRequest()
     				.contentType(MediaType.TEXT_PLAIN)
@@ -84,7 +91,7 @@ public class SDKController {
     				return ResponseEntity
     						.ok()
     						.contentType(MediaType.TEXT_PLAIN)
-    						.body("Device pairing successful");
+    						.body("Device pairing successful and activated for payments");
     			}
     			else {
     				return ResponseEntity
@@ -104,8 +111,14 @@ public class SDKController {
     
     @RequestMapping(value = "/activate", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> activateDevice(){
-    	if(KeyStore.getKeyStoreInstance().getDeviceState() != KeyStore.DEVICE_INVALID
-    			&& KeyStore.getKeyStoreInstance().getDeviceState() >= KeyStore.DEVICE_ACTIVE){
+    	if(KeyStore.getKeyStoreInstance().getDeviceState() == KeyStore.DEVICE_INVALID){
+    		return ResponseEntity
+    				.badRequest()
+    				.contentType(MediaType.TEXT_PLAIN)
+    				.body("Device is not configured, configure device first!!!");
+    	}
+    	else if(KeyStore.getKeyStoreInstance().getDeviceState() >= KeyStore.DEVICE_ACTIVE
+    			&& PairingService.getPairingServiceInstance().isDevicePaired()){
     		return ResponseEntity
     				.badRequest()
     				.contentType(MediaType.TEXT_PLAIN)
@@ -165,7 +178,8 @@ public class SDKController {
     		
     		String actionId = parsedActionId.substring(1, parsedActionId.length()-1);
     		LOGGER.config("Given Action ID: " + actionId);
-    		if(KeyStore.getKeyStoreInstance().getDeviceState() < KeyStore.DEVICE_ACTIVE)
+    		if(KeyStore.getKeyStoreInstance().getDeviceState() == KeyStore.DEVICE_INVALID
+    				|| KeyStore.getKeyStoreInstance().getDeviceState() < KeyStore.DEVICE_ACTIVE)
         		return ResponseEntity
     					.badRequest()
     					.contentType(MediaType.TEXT_PLAIN)

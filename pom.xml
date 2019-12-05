@@ -19,15 +19,15 @@
     <developer>
       <id>lokesh</id>
       <name>Lokesh K Haralakatta</name>
-      <email>lokeshkot@hcl.com</email>
+      <email>lokesh@makethingsfinn.com</email>
       <url>https://in.linkedin.com/in/lokesh-h-k-664b93157</url>
-      <organization>HCL</organization>
-      <organizationUrl>https://www.hcltech.com/</organizationUrl>
+      <organization>FINN Banking of Thnigs</organization>
+      <organizationUrl>https://makethingsfinn.com/</organizationUrl>
       <roles>
         <role>architect</role>
         <role>developer</role>
       </roles>
-      <timezone>Asia/Calcutta</timezone>
+      <timezone>CET/Amsterdam</timezone>
     </developer>
   </developers>
   <properties>

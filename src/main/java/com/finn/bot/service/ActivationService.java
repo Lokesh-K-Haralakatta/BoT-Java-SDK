@@ -72,9 +72,18 @@ public class ActivationService {
 	//Method to activate the device by polling activation status for max number of tries 
 	//Set Device State to Active on successful activation
 	public synchronized void activateDevice() throws InterruptedException{
+		if(keyStore.getDeviceState() != KeyStore.DEVICE_INVALID &&
+			keyStore.getDeviceState() >= KeyStore.DEVICE_ACTIVE &&
+			PairingService.getPairingServiceInstance().isDevicePaired()){
+			LOGGER.config("Device is already paired and activated OR Device is Multipair");
+			return;
+		}
+		
 		if(pollActivationStatus()){
-			keyStore.setDeviceState(KeyStore.DEVICE_ACTIVE);
-			LOGGER.config("Device is activated for payments...");
+			if(keyStore.getDeviceState() != KeyStore.DEVICE_MULTIPAIR)
+				keyStore.setDeviceState(KeyStore.DEVICE_ACTIVE);
+			LOGGER.config("Device is activated for payments, DeviceState set to " +
+					             keyStore.getDeviceState(keyStore.getDeviceState()));
 		}
 		else {
 			LOGGER.severe("Device could not be activated for payments, try again!!!");

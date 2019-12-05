@@ -74,14 +74,14 @@ public class PairingService {
 	//Set Device state to paired and pass on the control to activate the device
 	public synchronized void pairDevice() throws InterruptedException {
 		if(keyStore.getDeviceState() != KeyStore.DEVICE_INVALID &&
-				keyStore.getDeviceState() >= KeyStore.DEVICE_ACTIVE){
+				keyStore.getDeviceState() >= KeyStore.DEVICE_ACTIVE &&
+				this.isDevicePaired()){
 			LOGGER.config("Device is already paired and activated OR Device is Multipair");
 			return;
 		}
 		
 		if(pollPairingStatus()){
-			if(keyStore.getDeviceAltId() != null) {
-				keyStore.setDeviceState(KeyStore.DEVICE_MULTIPAIR);
+			if(keyStore.getDeviceState() == KeyStore.DEVICE_MULTIPAIR) {
 				LOGGER.config("Device is multi-pair enabled Device ...");
 			}
 			else {

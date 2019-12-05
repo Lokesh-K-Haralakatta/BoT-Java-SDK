@@ -99,11 +99,12 @@ public class ActionService {
 	public String triggerAction(final String actionID){
 		if(actionID == null){
 			LOGGER.severe("ActionID can not be NULL");
-			return null;
+			return "ActionID can not be NULL";
 		}
 		else if(!isActionValid(actionID)){
 			LOGGER.severe("Invalid ActionID - " +actionID);
-			return null;
+			return "Invalid ActionID - " + actionID + " Not present in retrieved actions OR "
+					+ "Action Frequency is not valid";
 			
 		}
 		else {

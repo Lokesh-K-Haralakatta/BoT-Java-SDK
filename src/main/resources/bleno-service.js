@@ -76,7 +76,8 @@ bleno.on('advertisingStart', function(error) {
         	device_data.multipair = 1;
         	device_data.aid = alternateID;
         }
-        console.log(device_data);
+        var deviceInfoJsonString = JSON.stringify(device_data);
+        console.log(deviceInfoJsonString);
         
         bleno.setServices([          
             // Define a new service
@@ -91,10 +92,46 @@ bleno.on('advertisingStart', function(error) {
                         // Send a message back to the client with the characteristic's value
                         onReadRequest : function(offset, callback) {
                             console.log("Read request received for device characteristic, Offset: "+offset);
-                            this.value = new Buffer(JSON.stringify(device_data));
+                            this.value = new Buffer(deviceInfoJsonString);
                             callback(this.RESULT_SUCCESS,this.value.slice(offset, this.value.length));
                         }
-                     })
+                     }),
+                     // Define device info characteristic within the service
+                     new bleno.Characteristic({
+                         value : null,
+                         uuid : DEVICE_INFO_CHARACTERISTIC_UUID,
+                         properties : ['read'],
+                         // Send a message back to the client with the characteristic's value
+                         onReadRequest : function(offset, callback) {
+                             console.log("Read request received for device info characteristic, Offset: "+offset);
+                             this.value = new Buffer(JSON.stringify({}));
+                             callback(this.RESULT_SUCCESS,this.value.slice(offset, this.value.length));
+                         }
+                      }),
+                      // Define device network characteristic within the service
+                      new bleno.Characteristic({
+                          value : null,
+                          uuid : DEVICE_NETWORK_CHARACTERISTIC_UUID,
+                          properties : ['read'],
+                          // Send a message back to the client with the characteristic's value
+                          onReadRequest : function(offset, callback) {
+                              console.log("Read request received for device network characteristic, Offset: "+offset);
+                              this.value = new Buffer(JSON.stringify({}));
+                              callback(this.RESULT_SUCCESS,this.value.slice(offset, this.value.length));
+                          }
+                       }),
+                       // Define device configure characteristic within the service
+                       new bleno.Characteristic({
+                           value : null,
+                           uuid : CONFIGURE_CHARACTERISTIC_UUID,
+                           properties : ['read', 'write'],
+                           // Send a message back to the client with the characteristic's value
+                           onReadRequest : function(offset, callback) {
+                               console.log("Read request received for device configure characteristic, Offset: "+offset);
+                               this.value = new Buffer(JSON.stringify({}));
+                               callback(this.RESULT_SUCCESS,this.value.slice(offset, this.value.length));
+                           }
+                        })
                 ]
             })
         ]);
