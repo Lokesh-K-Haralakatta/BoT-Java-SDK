@@ -47,6 +47,7 @@
    - Install Git using the command `apt-get install git` if it's not available on Raspbian
  * Go to BoT-Java-SDK directory and perform below steps in sequence to setup the sdk
    - Install all required prequisite packages by executing the command **`make install`**. It may take couple of minutes to complete based on network speed, if it's first time execution
+   - Run `make reset` to remove any previous device configurations persisted, provide options to reset everything
    - Configure the device by executing the command **`make configure`**
    - Pair the device with the [FINN Mobile App](https://docs.bankingofthings.io/mobile-app) using BLE Feature
      - Login to FINN Mobile Application and search for BLE Device to pair
@@ -62,6 +63,7 @@
    - For all the above described steps, the default log files location is **`/tmp/java-sdk-*.log`**
    - Go to the [Maker Portal](https://maker.bankingofthings.io/login) under the tab **`Statistics -> Customers -> Click on Customer ID field`** to view the connected devices
    - Go to the [Maker Portal](https://maker.bankingofthings.io/login) to check the autonomous payments status under the tab **`Statistics -> Actions -> Payments -> Click on the Action Name`** to view the action statistics
+   - Run `make rerest` to remove the existing configurations before going with fresh `make configure`
  
  ## Getting Started with SDK as a Java Library
  ### Build the BoT-Java-SDK Jar
