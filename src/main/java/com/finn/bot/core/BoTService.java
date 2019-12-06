@@ -63,7 +63,7 @@ public class BoTService {
 	private static BoTService instance = new BoTService();
 	
 	//BoT Service related constants
-	private final static String HOST = "iot-dev.bankingofthings.io"; 
+	private final static String HOST = "iot.bankingofthings.io"; 
 	private final static String URI = "";
 	
 	//Root CA SSL Finger Print Values
