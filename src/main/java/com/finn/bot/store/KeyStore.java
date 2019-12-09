@@ -48,7 +48,7 @@ import redis.clients.jedis.Jedis;
 
 public class KeyStore {
 	//Class Logger Instance
-	private final static Logger LOGGER = Logger.getLogger(KeyStore.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(KeyStore.class.getName());
 	
 	//Instance for KeyStore Class as it's designed to follow singleton pattern
 	private static KeyStore instance = new KeyStore();
@@ -124,7 +124,7 @@ public class KeyStore {
 	public void generateQRCode()throws WriterException, IOException {
 		if(!isQRCodeGenerated()){
 			// Create the ByteMatrix for the QR-Code that encodes the given String
-			Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<>();
+			HashMap<EncodeHintType, ErrorCorrectionLevel> hintMap = new HashMap<>();
 			hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
 			QRCodeWriter qrCodeWriter = new QRCodeWriter();
 			BitMatrix byteMatrix = qrCodeWriter.encode(this.getDeviceInfo(), BarcodeFormat.QR_CODE, QR_CODE_SIZE, QR_CODE_SIZE, hintMap);
@@ -202,7 +202,7 @@ public class KeyStore {
 		//Convert DeviceInfo Instance to JSON String
 		Gson gson = new Gson();
 		String jsonDeviceInfo = gson.toJson(deviceInfo);
-		LOGGER.config("Device Info in JSON String: " + jsonDeviceInfo);
+		LOGGER.config(jsonDeviceInfo);
 		
 		return jsonDeviceInfo;
 	}
@@ -219,7 +219,7 @@ public class KeyStore {
 	}
 	
 	//Method to retrieve device state value from Redis and return it's integer value
-	public int getDeviceState(){
+	public synchronized int getDeviceState(){
 		String state = null;
 		if((state = jedisClient.get(DEVICE_STATE_KEY)) != null)
 			return Integer.parseInt(state);
@@ -254,7 +254,7 @@ public class KeyStore {
 	}
 	
 	//Method to get deviceName from deviceInfo store
-	public String getDeviceName(){
+	public synchronized String getDeviceName(){
 		return jedisClient.hget(DEVICE_INFO_STORE,DEVICE_NAME);
 	}
 	
@@ -264,7 +264,7 @@ public class KeyStore {
 	}
 	
 	//Method to get makerID from deviceInfo store
-	public String getMakerId(){
+	public synchronized String getMakerId(){
 		return jedisClient.hget(DEVICE_INFO_STORE,MAKER_ID);
 	}
 
@@ -274,7 +274,7 @@ public class KeyStore {
 	}
 	
 	//Method to get deviceAlternateID from deviceInfo store
-	public String getDeviceAltId(){
+	public synchronized String getDeviceAltId(){
 		return jedisClient.hget(DEVICE_INFO_STORE,DEVICE_ALTERNATE_ID);
 	}
 	
@@ -287,14 +287,15 @@ public class KeyStore {
 				LOGGER.config("KeyPairs already generated and present in Key Store");
 				switch(keyType){
 				case API_KEY: key = jedisClient.hget(KEYPAIR_STORE, API_KEY);
-                			  LOGGER.config("Length of API Key: " + key.length());
+                			  LOGGER.config("Loaded API Key");
                 			  break;
 				case PRIVATE_KEY: key = jedisClient.hget(KEYPAIR_STORE, PRIVATE_KEY);
-  			  					  LOGGER.config("Length of Private Key: " + key.length());
+  			  					  LOGGER.config("Loaded Private Key");
   			  					  break;
 				case PUBLIC_KEY: key = jedisClient.hget(KEYPAIR_STORE, PUBLIC_KEY);
-					  			 LOGGER.config("Length of Public Key: " + key.length());
-					  			 break;  			  					  
+					  			 LOGGER.config("Loaded Public Key");
+					  			 break;
+			    default: LOGGER.severe("Invalid Key Type requested");
 				}	
 		    }
 			else 
@@ -310,11 +311,11 @@ public class KeyStore {
 	private byte[] readKeyContentsFromFile(final String keyFilePath) throws IOException {
 		
 		//Read key contents from provided key file
-		LOGGER.config("Loading contents from " + keyFilePath);
+		LOGGER.config("Loading key contents from given keyFilePath");
 		InputStream in = getClass().getResourceAsStream(keyFilePath);
 		DataInputStream dis = new DataInputStream(in);
 		final int keyBytesLength = in.available();
-		LOGGER.config("Available bytes : " + keyBytesLength);
+		LOGGER.config("Loaded key contents from given keyFilePath");
 		byte[] keyBytes = new byte[keyBytesLength];
 		dis.readFully(keyBytes);
 		in.close();
@@ -371,9 +372,6 @@ public class KeyStore {
 				LOGGER.config("Loaded key pair contents from files");
 			}
 			
-			LOGGER.config("Bytes in Private Key: " +privateKeyBytes.length);
-			LOGGER.config("Bytes in Public Key: " +publicKeyBytes.length);
-			
 			/* Generate private key.*/ 
 			PKCS8EncodedKeySpec pkcsKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
 			KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -386,7 +384,7 @@ public class KeyStore {
 			PublicKey pubKey = kf.generatePublic(x509KeySpec);
 			LOGGER.config("Public Key successfully loaded..."); 
 			
-			Map<String,String> keyPairMap = new HashMap<String,String>();
+			Map<String,String> keyPairMap = new HashMap<>();
 			keyPairMap.put(PRIVATE_KEY,Base64.getEncoder().encodeToString(pvtKey.getEncoded()));
 			keyPairMap.put(PUBLIC_KEY, Base64.getEncoder().encodeToString(pubKey.getEncoded()));
 			
@@ -404,7 +402,7 @@ public class KeyStore {
 	//Method to clear generated QrCode
 	public void clearKeyPair(){
 		jedisClient.set(KEYPAIR_FLAG,"false");
-		Map<String,String> keyPairMap = new HashMap<String,String>();
+		Map<String,String> keyPairMap = new HashMap<>();
 		keyPairMap.put(PRIVATE_KEY,"");
 		keyPairMap.put(PUBLIC_KEY, "");
 		jedisClient.hset(KEYPAIR_STORE,keyPairMap);
@@ -431,11 +429,11 @@ public class KeyStore {
 		if(action != null){
 			final String actionId = action.getActionId();
 			final String KEY = ACTION_STORE_PREFIX+actionId;
-			Map<String,String> actionMap = new HashMap<String,String>();
+			Map<String,String> actionMap = new HashMap<>();
 			actionMap.put("actionId", actionId);
 			actionMap.put("ltt", action.getLastTriggerTime());
 			result = jedisClient.hset(KEY,actionMap);
-			LOGGER.config("Added action with id - " + actionId + " to Actions Store");
+			LOGGER.config("Added action to Actions Store");
 		}
 		
 		return result;
@@ -447,7 +445,7 @@ public class KeyStore {
 		Map<String,String> actionMap = jedisClient.hgetAll(KEY);
 		ActionInfo action = null;
 		if(actionMap.size() > 0){
-			LOGGER.config("Retrieved action with id - " + actionId + " from Actions Store");
+			LOGGER.config("Retrieved action from Actions Store");
 			action = new ActionInfo(actionMap.get("actionId"),actionMap.get("ltt"));
 		}
 		return action;
@@ -456,14 +454,15 @@ public class KeyStore {
 	//Method to return all actions available in Redis actions store
 	public Set<ActionInfo> getAllActions(){
 		final String keyPattern = ACTION_STORE_PREFIX+"*";
-		LOGGER.config("Prepared Key Pattern to get all actions: " +keyPattern);
+		LOGGER.config("Prepared Key Pattern to get all actions");
 		Set<String> actionKeys = jedisClient.keys(keyPattern);
 		Set<ActionInfo> allActions = new HashSet<ActionInfo>();
-		LOGGER.info("Total actions keys retrieved from Actions Store: " +actionKeys.size());
+		LOGGER.info("Actions keys retrieved from Actions Store");
 		String actionId;
 		for(String actionKey : actionKeys){
 			actionId = actionKey.split("#")[1];
-			LOGGER.config("Retrieving action details for actionId: " +actionId);
+			String actionDetails = String.format("Retrieving action details for actionId: %s",actionId);
+			LOGGER.config(actionDetails);
 			allActions.add(getAction(actionId));
 		}
 		return allActions;
