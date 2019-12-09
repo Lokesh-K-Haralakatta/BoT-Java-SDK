@@ -11,7 +11,7 @@
    |        2      | Pairing through QR Code                    | :thumbsup: | Supported only in Webserver mode through end point /qrcode to get generated QRCode for device to be paired |
    |        3      | Secured HTTP with BoT Service              | :thumbsup: | Supported for all interactions with backend server |
    |        4      | Logging                                    | :thumbsup: | Supported with Java Util Logging for SDK and Springboot logging for Webserver. Default log path is /tmp.|
-   |        5      | Offline Actions                            | :thumbsdown: | Supported with Java Util Logging for SDK and Springboot logging for Webserver. Default log path is /tmp.|
+   |        5      | Offline Actions                            | :thumbsdown: | Helps to persist the autonomous payments on the device when there is no internet connectivity available. The saved offline actions get completed when the next action trigger happens and internet connectivity is available. This feature is in plan for implementation.|
    
 ## Prerequisites
 * **Hardware Devices**
