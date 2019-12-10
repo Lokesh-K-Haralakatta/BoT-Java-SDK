@@ -13,6 +13,7 @@ import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.finn.bot.api.SDKWrapper;
 import com.finn.bot.core.BoTService;
@@ -27,6 +28,13 @@ import com.finn.bot.store.KeyStore;
 import com.google.zxing.WriterException;
 
 public class IntegrationTests {
+	//Class Logger Instance
+	private static final Logger LOGGER = Logger.getLogger(IntegrationTests.class.getName());
+	
+	//Private constructor
+	private IntegrationTests() {}
+	
+	//Service Instances needed for tests
     private static KeyStore keyStore = KeyStore.getKeyStoreInstance();
     private static BoTService botService = BoTService.getBoTServiceInstance();
     private static PairingService pairService = PairingService.getPairingServiceInstance();
@@ -35,6 +43,7 @@ public class IntegrationTests {
     private static ConfigurationService configService = ConfigurationService.getConfigurationServiceInstance();
     private static BLEService bleService = BLEService.getBLEServiceInstance();
     
+    //Independent test modules
 	private static void testActionsStore(){
 		KeyStore keyStore = KeyStore.getKeyStoreInstance();
 		ActionInfo action = new ActionInfo();
@@ -51,36 +60,36 @@ public class IntegrationTests {
 		action.setActionId(keyStore.generateUUID4());
 		action.setLastTriggerTime(""+12345678);
 		keyStore.storeAction(action);
-		System.out.println("Total 3 actions placed into Store");
+		LOGGER.info("Total 3 actions placed into Store");
 		
 		action = keyStore.getAction(actionId);
-		System.out.println("Action ID: " + action.getActionId() + "\nAction ltt: " + action.getLastTriggerTime());
+		LOGGER.info("Action ID: " + action.getActionId() + "\nAction ltt: " + action.getLastTriggerTime());
 		
 		action = keyStore.getAction(null);
 		if(action != null)
-			System.out.println("Error: action details found for null actionId");
+			LOGGER.info("Error: action details found for null actionId");
 		else
-			System.out.println("No action found for actionId value null");
+			LOGGER.info("No action found for actionId value null");
 		
 		action = keyStore.getAction("actionId-3");
 		if(action == null)
-			System.out.println("No action details found for non existing actionId value actionId-3");
+			LOGGER.info("No action details found for non existing actionId value actionId-3");
 		else
-		    System.out.println("Error: action details found for non existing actionId value actionId-3");
+		    LOGGER.info("Error: action details found for non existing actionId value actionId-3");
 		
 		Set<ActionInfo> allActions = keyStore.getAllActions();
-		System.out.println("Total actions in Store: " +allActions.size());
+		LOGGER.info("Total actions in Store: " +allActions.size());
 		for(ActionInfo actionItem : allActions){
-			System.out.println("Action ID: " + actionItem.getActionId() + "\nAction ltt: " + actionItem.getLastTriggerTime());
+			LOGGER.info("Action ID: " + actionItem.getActionId() + "\nAction ltt: " + actionItem.getLastTriggerTime());
 		}
 	}
 	
 	private static void testKeyPairsFunctionality() throws NoSuchProviderException, NoSuchAlgorithmException, IOException, InvalidKeySpecException, CertificateException {
 		if(keyStore.isKeyPairGenerated()){
-			System.out.println("Key Pairs already generated and stored for the device");
+			LOGGER.info("Key Pairs already generated and stored for the device");
 		}
 		else {
-			System.out.println("Key Pairs are not generated for the device, doing it now...");
+			LOGGER.info("Key Pairs are not generated for the device, doing it now...");
 			keyStore.generateAndStoreKeyPair(true);
 		}
 	}
@@ -88,30 +97,30 @@ public class IntegrationTests {
 	private static void testGetKeys(){
 		String key = keyStore.getKey(KeyStore.API_KEY);
 		if(key != null){
-			System.out.println("API Key Retrieved from Key Store:\n ====================== \n");
-			System.out.println(key);
-			System.out.println("\n ====================== \n");
+			LOGGER.info("API Key Retrieved from Key Store:\n ====================== \n");
+			LOGGER.info(key);
+			LOGGER.info("\n ====================== \n");
 		}
 		else
-			System.out.println("Failed to get API Key Contents from Key Store");
+			LOGGER.info("Failed to get API Key Contents from Key Store");
 		
 		key = keyStore.getKey(KeyStore.PRIVATE_KEY);
 		if(key != null){
-			System.out.println("Private Key Retrieved from Key Store:\n ====================== \n");
-			System.out.println(key);
-			System.out.println("\n ====================== \n");
+			LOGGER.info("Private Key Retrieved from Key Store:\n ====================== \n");
+			LOGGER.info(key);
+			LOGGER.info("\n ====================== \n");
 		}
 		else
-			System.out.println("Failed to get Private Key Contents from Key Store");
+			LOGGER.info("Failed to get Private Key Contents from Key Store");
 		
 		key = keyStore.getKey(KeyStore.PUBLIC_KEY);
 		if(key != null){
-			System.out.println("Public Key Retrieved from Key Store:\n ====================== \n");
-			System.out.println(key);
-			System.out.println("\n ====================== \n");
+			LOGGER.info("Public Key Retrieved from Key Store:\n ====================== \n");
+			LOGGER.info(key);
+			LOGGER.info("\n ====================== \n");
 		}
 		else
-			System.out.println("Failed to get Public Key Contents from Key Store");
+			LOGGER.info("Failed to get Public Key Contents from Key Store");
 		
 	}
 	
@@ -125,90 +134,82 @@ public class IntegrationTests {
 		//Get deviceInfo Items
 		String deviceID = keyStore.getDeviceId();
 		if(deviceID == null)
-			System.out.println("DeviceID is NULL");
+			LOGGER.info("DeviceID is NULL");
 		else
-			System.out.println("DeviceID: " +deviceID);
+			LOGGER.info("DeviceID: " +deviceID);
 		
 		String makerID = keyStore.getMakerId();
 		if(makerID == null)
-			System.out.println("MakerID is NULL");
+			LOGGER.info("MakerID is NULL");
 		else
-			System.out.println("MakerID: " +makerID);
+			LOGGER.info("MakerID: " +makerID);
 		
 		String deviceAltID = keyStore.getDeviceAltId();
 		if(deviceAltID == null)
-			System.out.println("DeviceAltID is NULL");
+			LOGGER.info("DeviceAltID is NULL");
 		else
-			System.out.println("DeviceAltID: " +deviceAltID);
+			LOGGER.info("DeviceAltID: " +deviceAltID);
 	
 	}
 	
 	private static void testDeviceState(){
 		int state = keyStore.getDeviceState();
-		System.out.println("Device State: " + state);
-		System.out.println("Device State Msg: " + keyStore.getDeviceState(state));
+		LOGGER.info("Device State: " + state);
+		LOGGER.info("Device State Msg: " + keyStore.getDeviceState(state));
 		
 		//Set Device State to NEW
-		System.out.println("Setting device state to NEW");
+		LOGGER.info("Setting device state to NEW");
 		keyStore.setDeviceState(KeyStore.DEVICE_NEW);
 		state = keyStore.getDeviceState();
-		System.out.println("Device State: " + state);
-		System.out.println("Device State Msg: " + keyStore.getDeviceState(state));
+		LOGGER.info("Device State: " + state);
+		LOGGER.info("Device State Msg: " + keyStore.getDeviceState(state));
 		
 		//Set Device State to PAIRED
-		System.out.println("Setting device state to PAIRED");
+		LOGGER.info("Setting device state to PAIRED");
 		keyStore.setDeviceState(KeyStore.DEVICE_PAIRED);
 		state = keyStore.getDeviceState();
-		System.out.println("Device State: " + state);
-		System.out.println("Device State Msg: " + keyStore.getDeviceState(state));
+		LOGGER.info("Device State: " + state);
+		LOGGER.info("Device State Msg: " + keyStore.getDeviceState(state));
 		
 		//Set Device State to ACTIVE
-		System.out.println("Setting device state to ACTIVE");
+		LOGGER.info("Setting device state to ACTIVE");
 		keyStore.setDeviceState(KeyStore.DEVICE_ACTIVE);
 		state = keyStore.getDeviceState();
-		System.out.println("Device State: " + state);
-		System.out.println("Device State Msg: " + keyStore.getDeviceState(state));	
+		LOGGER.info("Device State: " + state);
+		LOGGER.info("Device State Msg: " + keyStore.getDeviceState(state));	
 		
 		//Set Device State to MULTIPAIR
-		System.out.println("Setting device state to MULTIPAIR");
+		LOGGER.info("Setting device state to MULTIPAIR");
 		keyStore.setDeviceState(KeyStore.DEVICE_MULTIPAIR);
 		state = keyStore.getDeviceState();
-		System.out.println("Device State: " + state);
-		System.out.println("Device State Msg: " + keyStore.getDeviceState(state));
+		LOGGER.info("Device State: " + state);
+		LOGGER.info("Device State Msg: " + keyStore.getDeviceState(state));
 		
 		//Set Device State to INVALID VALUE
-		System.out.println("Setting device state to INVALID VALUE");
+		LOGGER.info("Setting device state to INVALID VALUE");
 		keyStore.setDeviceState(34);
 		state = keyStore.getDeviceState();
-		System.out.println("Device State: " + state);
-		System.out.println("Device State Msg: " + keyStore.getDeviceState(state));		
+		LOGGER.info("Device State: " + state);
+		LOGGER.info("Device State Msg: " + keyStore.getDeviceState(state));		
 	}
 	
 	private static void testDeviceInfoJSON(){
 		String deviceInfoJson = keyStore.getDeviceInfo();
-		System.out.println("DeviceInfo: " + deviceInfoJson);
+		LOGGER.info("DeviceInfo: " + deviceInfoJson);
 	}
 	
 	private static void testQRCodeGenerationAndRetrieveal(){
 		byte[] qrCodeBytes = keyStore.getQRCode();
-		System.out.println("Number of bytes in QRCode: " +qrCodeBytes.length);
+		LOGGER.info("Number of bytes in QRCode: " +qrCodeBytes.length);
 	}
 	
-	/*private static void testEncodeDecodeJWT() throws CertificateException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, URISyntaxException{
-		String subject = "Finn Banking of Things";
-		String encodedToken = botService.signToken(subject);
-		System.out.println("Encoded JWT Token: " +encodedToken);
-		String decodedText = botService.decodeJWT(encodedToken);
-		System.out.print("Decoded Text: " +decodedText);
-	}*/
-
 	private static void testBoTHTTPGet(){
 		//botService.setHTTPS(false);
 		try {
 			String response = botService.get("/pair");
 			System.out.print("Device Pair Status: " + response);
 			response = botService.get("/actions");
-			System.out.println("Actions from Server: \n"+response+"\n");
+			LOGGER.info("Actions from Server: \n"+response+"\n");
 		}
 		catch(Exception e){
 			e.printStackTrace();
@@ -218,8 +219,8 @@ public class IntegrationTests {
 	private static void testBoTHttpPost() throws KeyManagementException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
 		String actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
 		//botService.setHTTPS(false);
-		System.out.println("Trigger action for " +actionId);
-		System.out.println("Response from HTTP Post Execution: " + botService.post("/actions", actionId));
+		LOGGER.info("Trigger action for " +actionId);
+		LOGGER.info("Response from HTTP Post Execution: " + botService.post("/actions", actionId));
 	}
 	
 	private static void testDevicePairing() throws InterruptedException{
@@ -232,9 +233,9 @@ public class IntegrationTests {
 	
 	private static void testGetActions(){
 	   List<ActionDTO> actions = actionService.getActions();
-	   System.out.println("Number of Actions Retrieved: " + actions.size());
+	   LOGGER.info("Number of Actions Retrieved: " + actions.size());
 	   for(ActionDTO action:actions){
-		   System.out.println(action.getActionID()+":"+action.getActionName()+":"+action.getFrequency());
+		   LOGGER.info(action.getActionID()+":"+action.getActionName()+":"+action.getFrequency());
 	   }
 	}
 	
@@ -244,130 +245,130 @@ public class IntegrationTests {
 		keyStore.setDeviceState(KeyStore.DEVICE_ACTIVE);
 		
 		String actionId = "E6509B49-5048-4151-B965-BB7B2DBC7905";
-		System.out.println("Response from postAction for always valid action: " +actionService.triggerAction(actionId));
+		LOGGER.info("Response from postAction for always valid action: " +actionService.triggerAction(actionId));
 
 		actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
-		System.out.println("Response from postAction for minutely action: " +actionService.triggerAction(actionId));
+		LOGGER.info("Response from postAction for minutely action: " +actionService.triggerAction(actionId));
 
 		actionId = "749081B8-664D-4A15-908E-1C3F6590930D";
-		System.out.println("Response from postAction for hourly action: " +actionService.triggerAction(actionId));
+		LOGGER.info("Response from postAction for hourly action: " +actionService.triggerAction(actionId));
 
 		actionId = "81F6011A-9AF0-45AE-91CD-9A0CDA81FA1F";
-		System.out.println("Response from postAction for daily action: " +actionService.triggerAction(actionId));
+		LOGGER.info("Response from postAction for daily action: " +actionService.triggerAction(actionId));
 
 		actionId = "0BF5E8D2-9062-467E-BB19-88CB76D06F8E";
-		System.out.println("Response from postAction for weekly action: " +actionService.triggerAction(actionId));
+		LOGGER.info("Response from postAction for weekly action: " +actionService.triggerAction(actionId));
 		
 		actionId = "C257DB70-AE57-4409-B94E-678CB1567FA6";
-		System.out.println("Response from postAction for monthly action: " +actionService.triggerAction(actionId));
+		LOGGER.info("Response from postAction for monthly action: " +actionService.triggerAction(actionId));
 		
 		actionId = "D93F99E1-011B-4609-B04E-AEDBA98A7C5F";
-		System.out.println("Response from postAction for half-yearly action: " +actionService.triggerAction(actionId));
+		LOGGER.info("Response from postAction for half-yearly action: " +actionService.triggerAction(actionId));
 		
 		actionId = "0097430C-FA78-4087-9B78-3AC7FEEF2245";
-		System.out.println("Response from postAction for yearly action: " +actionService.triggerAction(actionId));
+		LOGGER.info("Response from postAction for yearly action: " +actionService.triggerAction(actionId));
 		
 		actionId = "A42ABD19-3226-47AB-8045-8129DBDF117F";
-		System.out.println("Response from postAction for invalid action: " +actionService.triggerAction(actionId));
+		LOGGER.info("Response from postAction for invalid action: " +actionService.triggerAction(actionId));
 	}
 	
 	private static void testDeviceConfiguration() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, IOException, WriterException, InterruptedException{
 		//Reset existing device configuration
 		configService.resetDeviceConfiguration(true,true);
-		System.out.println("Device Configuration after reseting existing configuration: ");
-		System.out.println("MakerID: "+keyStore.getMakerId());
-		System.out.println("DeviceID: "+keyStore.getDeviceId());
-		System.out.println("DeviceName: "+keyStore.getDeviceName());
-		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
-		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
-		System.out.println("KeyPair Exists: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
-		System.out.println("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
+		LOGGER.info("Device Configuration after reseting existing configuration: ");
+		LOGGER.info("MakerID: "+keyStore.getMakerId());
+		LOGGER.info("DeviceID: "+keyStore.getDeviceId());
+		LOGGER.info("DeviceName: "+keyStore.getDeviceName());
+		LOGGER.info("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		LOGGER.info("KeyPair Exists: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		LOGGER.info("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
 		
 		//Initialize device with new deviceID and single pair
 		configService.initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", null, true, false, null);
-		System.out.println("Device Configuration after initializing for Single Pair: ");
-		System.out.println("MakerID: "+keyStore.getMakerId());
-		System.out.println("DeviceID: "+keyStore.getDeviceId());
-		System.out.println("DeviceName: "+keyStore.getDeviceName());
-		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
-		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
-		System.out.println("KeyPair Generated: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
-		System.out.println("QrCode Generated: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
+		LOGGER.info("Device Configuration after initializing for Single Pair: ");
+		LOGGER.info("MakerID: "+keyStore.getMakerId());
+		LOGGER.info("DeviceID: "+keyStore.getDeviceId());
+		LOGGER.info("DeviceName: "+keyStore.getDeviceName());
+		LOGGER.info("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		LOGGER.info("KeyPair Generated: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		LOGGER.info("QrCode Generated: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
 		
 		//Call configureDevice with device state as NEW
-		System.out.println("Configuring the device with state: " +keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("Configuring the device with state: " +keyStore.getDeviceState(keyStore.getDeviceState()));
 		configService.configureDevice();
 		
 		//Set device state as paired and call configure device
 		keyStore.setDeviceState(KeyStore.DEVICE_PAIRED);
-		System.out.println("Configuring the device with state: " +keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("Configuring the device with state: " +keyStore.getDeviceState(keyStore.getDeviceState()));
 		configService.configureDevice();
 
 		//Set device state as active and call configure device
 		keyStore.setDeviceState(KeyStore.DEVICE_ACTIVE);
-		System.out.println("Configuring the device with state: " +keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("Configuring the device with state: " +keyStore.getDeviceState(keyStore.getDeviceState()));
 		configService.configureDevice();
 		
 		//Reset device configuration without resetting the device ID
 		configService.resetDeviceConfiguration(false, false);
-		System.out.println("Device Configuration after reseting Single Pair with retianing deviceID and deviceName: ");
-		System.out.println("MakerID: "+keyStore.getMakerId());
-		System.out.println("DeviceID: "+keyStore.getDeviceId());
-		System.out.println("DeviceName: "+keyStore.getDeviceName());
-		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
-		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
-		System.out.println("KeyPair Exists: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
-		System.out.println("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
+		LOGGER.info("Device Configuration after reseting Single Pair with retianing deviceID and deviceName: ");
+		LOGGER.info("MakerID: "+keyStore.getMakerId());
+		LOGGER.info("DeviceID: "+keyStore.getDeviceId());
+		LOGGER.info("DeviceName: "+keyStore.getDeviceName());
+		LOGGER.info("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		LOGGER.info("KeyPair Exists: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		LOGGER.info("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
 		
 		//Initialize device with existing deviceID and multi pair
 		configService.initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", "MP-Device", true, true, "RPI-Java-MLP");
-		System.out.println("Device Configuration after initializing for Multi Pair: ");
-		System.out.println("MakerID: "+keyStore.getMakerId());
-		System.out.println("DeviceID: "+keyStore.getDeviceId());
-		System.out.println("DeviceName: "+keyStore.getDeviceName());
-		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
-		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
-		System.out.println("KeyPair Generated: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
-		System.out.println("QrCode Generated: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
+		LOGGER.info("Device Configuration after initializing for Multi Pair: ");
+		LOGGER.info("MakerID: "+keyStore.getMakerId());
+		LOGGER.info("DeviceID: "+keyStore.getDeviceId());
+		LOGGER.info("DeviceName: "+keyStore.getDeviceName());
+		LOGGER.info("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		LOGGER.info("KeyPair Generated: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		LOGGER.info("QrCode Generated: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
 
 		//Call configureDevice with device state as MULTIPAIR
-		System.out.println("Configuring the device with state: " +keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("Configuring the device with state: " +keyStore.getDeviceState(keyStore.getDeviceState()));
 		configService.configureDevice();
 		
 		//Reset device configuration with resetting the device ID
 		configService.resetDeviceConfiguration(true,false);
-		System.out.println("Device Configuration after reseting Multi Pair with reseting deviceID: ");
-		System.out.println("MakerID: "+keyStore.getMakerId());
-		System.out.println("DeviceID: "+keyStore.getDeviceId());
-		System.out.println("DeviceName: "+keyStore.getDeviceName());
-		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
-		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
-		System.out.println("KeyPair Exists: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
-		System.out.println("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));		
+		LOGGER.info("Device Configuration after reseting Multi Pair with reseting deviceID: ");
+		LOGGER.info("MakerID: "+keyStore.getMakerId());
+		LOGGER.info("DeviceID: "+keyStore.getDeviceId());
+		LOGGER.info("DeviceName: "+keyStore.getDeviceName());
+		LOGGER.info("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		LOGGER.info("KeyPair Exists: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		LOGGER.info("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));		
 	}
 	
 	private static void testBlenoService() throws IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, WriterException, InterruptedException{
 		//Reset existing device configuration
 		configService.resetDeviceConfiguration(true,true);
-		System.out.println("Device Configuration after reseting existing configuration: ");
-		System.out.println("MakerID: "+keyStore.getMakerId());
-		System.out.println("DeviceID: "+keyStore.getDeviceId());
-		System.out.println("DeviceName: "+keyStore.getDeviceName());
-		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
-		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
-		System.out.println("KeyPair Exists: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
-		System.out.println("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
+		LOGGER.info("Device Configuration after reseting existing configuration: ");
+		LOGGER.info("MakerID: "+keyStore.getMakerId());
+		LOGGER.info("DeviceID: "+keyStore.getDeviceId());
+		LOGGER.info("DeviceName: "+keyStore.getDeviceName());
+		LOGGER.info("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		LOGGER.info("KeyPair Exists: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		LOGGER.info("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
 		
 		//Initialize device with new deviceID and single pair
 		configService.initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", null, true, false, null);
-		System.out.println("Device Configuration after initializing for Single Pair: ");
-		System.out.println("MakerID: "+keyStore.getMakerId());
-		System.out.println("DeviceID: "+keyStore.getDeviceId());
-		System.out.println("DeviceName: "+keyStore.getDeviceName());
-		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
-		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
-		System.out.println("KeyPair Generated: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
-		System.out.println("QrCode Generated: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
+		LOGGER.info("Device Configuration after initializing for Single Pair: ");
+		LOGGER.info("MakerID: "+keyStore.getMakerId());
+		LOGGER.info("DeviceID: "+keyStore.getDeviceId());
+		LOGGER.info("DeviceName: "+keyStore.getDeviceName());
+		LOGGER.info("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		LOGGER.info("KeyPair Generated: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		LOGGER.info("QrCode Generated: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
 		
 		//Call executeBLENOService method to start bleno-service.js
 		bleService.executeBLENOService();
@@ -376,25 +377,25 @@ public class IntegrationTests {
 	private static void testBlenoServiceMultiPair() throws IOException, NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, WriterException, InterruptedException{
 		//Reset existing device configuration
 		configService.resetDeviceConfiguration(true,true);
-		System.out.println("Device Configuration after reseting existing configuration: ");
-		System.out.println("MakerID: "+keyStore.getMakerId());
-		System.out.println("DeviceID: "+keyStore.getDeviceId());
-		System.out.println("DeviceName: "+keyStore.getDeviceName());
-		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
-		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
-		System.out.println("KeyPair Exists: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
-		System.out.println("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
+		LOGGER.info("Device Configuration after reseting existing configuration: ");
+		LOGGER.info("MakerID: "+keyStore.getMakerId());
+		LOGGER.info("DeviceID: "+keyStore.getDeviceId());
+		LOGGER.info("DeviceName: "+keyStore.getDeviceName());
+		LOGGER.info("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		LOGGER.info("KeyPair Exists: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		LOGGER.info("QrCode Exists: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
 		
 		//Initialize device with new deviceID and multi pair
 		configService.initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", null, true, true, "RPI-Java-MLP");
-		System.out.println("Device Configuration after initializing for Single Pair: ");
-		System.out.println("MakerID: "+keyStore.getMakerId());
-		System.out.println("DeviceID: "+keyStore.getDeviceId());
-		System.out.println("DeviceName: "+keyStore.getDeviceName());
-		System.out.println("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
-		System.out.println("DeviceAlternateID: "+keyStore.getDeviceAltId());
-		System.out.println("KeyPair Generated: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
-		System.out.println("QrCode Generated: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
+		LOGGER.info("Device Configuration after initializing for Single Pair: ");
+		LOGGER.info("MakerID: "+keyStore.getMakerId());
+		LOGGER.info("DeviceID: "+keyStore.getDeviceId());
+		LOGGER.info("DeviceName: "+keyStore.getDeviceName());
+		LOGGER.info("DeviceState: "+keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.info("DeviceAlternateID: "+keyStore.getDeviceAltId());
+		LOGGER.info("KeyPair Generated: " + (keyStore.isKeyPairGenerated()?"yes":"no"));
+		LOGGER.info("QrCode Generated: " + (keyStore.isQRCodeGenerated()?"yes":"no"));
 		
 		//Call executeBLENOService method to start bleno-service.js
 		bleService.executeBLENOService();
@@ -410,7 +411,7 @@ public class IntegrationTests {
 	
 	private static void testSDKWrapperPairActivate() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InterruptedException, IOException, WriterException{
 		//Retrieving actions from server
-		System.out.println("Total actions retrieved: " + SDKWrapper.getActions().size());
+		LOGGER.info("Total actions retrieved: " + SDKWrapper.getActions().size());
 		
 		//Reset device configuration if required
 		//SDKWrapper.resetDeviceConfiguration(true, true);
@@ -418,9 +419,9 @@ public class IntegrationTests {
 		//Testing device pair and activation for payments
 		if(SDKWrapper.pairAndActivateDevice("469908A3-8F6C-46AC-84FA-4CF1570E564B", 
                 "RPI-Zero-Java", true, false, null))
-			System.out.println("SDKWrapper.pairAndActivateDevice Success");
+			LOGGER.info("SDKWrapper.pairAndActivateDevice Success");
 		else
-			System.out.println("SDKWrapper.pairAndActivateDevice Failed!!!");
+			LOGGER.info("SDKWrapper.pairAndActivateDevice Failed!!!");
 	}
 	
 	private static void testSDKWrapperPairActivateMultiPair() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InterruptedException, IOException, WriterException{
@@ -430,9 +431,9 @@ public class IntegrationTests {
 		//Testing device pair and activation for payments of Multipair device
 		if(SDKWrapper.pairAndActivateDevice("469908A3-8F6C-46AC-84FA-4CF1570E564B", 
                 "RPI-Zero-Java-MP", true, true, "Java-MPD"))
-			System.out.println("SDKWrapper.pairAndActivateDevice Success");
+			LOGGER.info("SDKWrapper.pairAndActivateDevice Success");
 		else
-			System.out.println("SDKWrapper.pairAndActivateDevice Failed!!!");
+			LOGGER.info("SDKWrapper.pairAndActivateDevice Failed!!!");
 	}	
 	
 	private static void testSDKWrapperTriggerAction(){
@@ -460,38 +461,37 @@ public class IntegrationTests {
 		//Trigger the valid action with the original device state
 		String actionId = "E6509B49-5048-4151-B965-BB7B2DBC7905";
 		if(SDKWrapper.triggerAction(actionId, 0.0))
-			System.out.println("Triggering valid action successful");
+			LOGGER.info("Triggering valid action successful");
 		else
-			System.out.println("Triggering valid action failed!!!");
+			LOGGER.info("Triggering valid action failed!!!");
 	}
 	
 	public static void runTests() throws NoSuchProviderException, NoSuchAlgorithmException, 
 	                   IOException, InvalidKeySpecException, CertificateException, KeyManagementException, InterruptedException, WriterException {
 		
 		//Command to execute the runTests method 
-		//java -Dbleno.service.path=/home/pi -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar tests
-		//java -Dbleno.service.path=/home/pi -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar tests
+		//java -Dbleno.service.path=/home/pi -jar BoT-Java-SDK.jar tests
+		//java -Dbleno.service.path=/home/pi -Djava.util.logging.config.file=logging.properties -jar BoT-Java-SDK.jar tests
 		
-		//testActionsStore();
-		//testKeyPairsFunctionality();
-		//testGetKeys();
-		//testDeviceInfoStore();
-		//testDeviceState();
-		//testDeviceInfoJSON();
-		//testQRCodeGenerationAndRetrieveal();
-		//testEncodeDecodeJWT();
-		//testBoTHTTPGet();
-		//testBoTHttpPost();
-		//testDevicePairing();
-		//testDeviceActivation();
-		//testGetActions();
-		//testTriggerAction();
+		testActionsStore();
+		testKeyPairsFunctionality();
+		testGetKeys();
+		testDeviceInfoStore();
+		testDeviceState();
+		testDeviceInfoJSON();
+		testQRCodeGenerationAndRetrieveal();
+		testBoTHTTPGet();
+		testBoTHttpPost();
+		testDevicePairing();
+		testDeviceActivation();
+		testGetActions();
+		testTriggerAction();
 		testDeviceConfiguration();
-		//testBlenoService();
-		//testBlenoServiceMultiPair();
-		//testBlenoServiceWithPairedDevice();
-		//testSDKWrapperMethods();
-		//testSDKWrapperPairActivateMultiPair();
-		//testSDKWrapperTriggerAction();
+		testBlenoService();
+		testBlenoServiceMultiPair();
+		testBlenoServiceWithPairedDevice();
+		testSDKWrapperPairActivate();
+		testSDKWrapperPairActivateMultiPair();
+		testSDKWrapperTriggerAction();
 	}
 }

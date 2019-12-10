@@ -21,7 +21,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -244,7 +243,7 @@ public class KeyStore {
 	}
 	
 	//Method to get deviceID from deviceInfo store
-	public String getDeviceId(){
+	public synchronized String getDeviceId(){
 		return jedisClient.hget(DEVICE_INFO_STORE,DEVICE_ID);
 	}
 
@@ -456,7 +455,7 @@ public class KeyStore {
 		final String keyPattern = ACTION_STORE_PREFIX+"*";
 		LOGGER.config("Prepared Key Pattern to get all actions");
 		Set<String> actionKeys = jedisClient.keys(keyPattern);
-		Set<ActionInfo> allActions = new HashSet<ActionInfo>();
+		Set<ActionInfo> allActions = new HashSet<>();
 		LOGGER.info("Actions keys retrieved from Actions Store");
 		String actionId;
 		for(String actionKey : actionKeys){
