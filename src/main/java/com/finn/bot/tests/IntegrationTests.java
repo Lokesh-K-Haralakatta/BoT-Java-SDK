@@ -102,26 +102,22 @@ public class IntegrationTests {
 	
 	private static void testGetKeys(){
 		String key = keyStore.getKey(KeyStore.API_KEY);
-		String lineFmt = "";
 		if(key != null){
-			lineFmt = String.format(" \n ====================== \n %s \n ====================== \n", key);
-			LOGGER.info(String.format("API Key Retrieved from Key Store: %s", lineFmt));
+			LOGGER.info(String.format("API Key Retrieved from Key Store: \n%s\n", key));
 		}
 		else
 			LOGGER.warning("Failed to get API Key Contents from Key Store");
 		
 		key = keyStore.getKey(KeyStore.PRIVATE_KEY);
 		if(key != null){
-			lineFmt = String.format(" \n ====================== \n %s \n ====================== \n", key);
-			LOGGER.info(String.format("Private Key Retrieved from Key Store: %s", lineFmt));
+			LOGGER.info(String.format("Private Key Retrieved from Key Store: \n%s\n", key));
 		}
 		else
 			LOGGER.warning("Failed to get Private Key Contents from Key Store");
 		
 		key = keyStore.getKey(KeyStore.PUBLIC_KEY);
 		if(key != null){
-			lineFmt = String.format(" \n ====================== \n %s \n ====================== \n", key);
-			LOGGER.info(String.format("Public Key Retrieved from Key Store: %s", lineFmt));
+			LOGGER.info(String.format("Public Key Retrieved from Key Store: \n%s\n", key));
 		}
 		else
 			LOGGER.warning("Failed to get Public Key Contents from Key Store");
