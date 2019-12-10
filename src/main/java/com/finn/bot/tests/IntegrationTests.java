@@ -80,7 +80,8 @@ public class IntegrationTests {
 		
 		Set<ActionInfo> allActions = keyStore.getAllActions();
 		if(allActions != null) {
-			LOGGER.info(String.format("Total actions in Store: %d" , allActions.size()));
+			String allActionsInfo = String.format("Total actions in Store: %d" , allActions.size());
+			LOGGER.info(allActionsInfo);
 			for(ActionInfo actionItem : allActions){
 				actionDetails = String.format("Action ID: %s \t Action ltt: %s" ,  actionItem.getActionId(), actionItem.getLastTriggerTime());
 				LOGGER.info(actionDetails);
@@ -103,21 +104,24 @@ public class IntegrationTests {
 	private static void testGetKeys(){
 		String key = keyStore.getKey(KeyStore.API_KEY);
 		if(key != null){
-			LOGGER.info(String.format("API Key Retrieved from Key Store: \n%s\n", key));
+			String apiKeyData = String.format("API Key Retrieved from Key Store: %s", key);
+			LOGGER.info(apiKeyData);
 		}
 		else
 			LOGGER.warning("Failed to get API Key Contents from Key Store");
 		
 		key = keyStore.getKey(KeyStore.PRIVATE_KEY);
 		if(key != null){
-			LOGGER.info(String.format("Private Key Retrieved from Key Store: \n%s\n", key));
+			String privateKeyData = String.format("Private Key Retrieved from Key Store: %s", key);
+			LOGGER.info(privateKeyData);
 		}
 		else
 			LOGGER.warning("Failed to get Private Key Contents from Key Store");
 		
 		key = keyStore.getKey(KeyStore.PUBLIC_KEY);
 		if(key != null){
-			LOGGER.info(String.format("Public Key Retrieved from Key Store: \n%s\n", key));
+			String publicKeyData = String.format("Public Key Retrieved from Key Store: %s", key);
+			LOGGER.info(publicKeyData);
 		}
 		else
 			LOGGER.warning("Failed to get Public Key Contents from Key Store");
@@ -136,8 +140,10 @@ public class IntegrationTests {
 	
 	private static void printDeviceStateInfo(final int state) {
 		if(state >=0 && state <=4) {
-			LOGGER.info(String.format("Device State: %d" , state));
-			LOGGER.info(String.format("Device State Msg: %s", keyStore.getDeviceState(state)));
+			String deviceStateStr = String.format("Device State: %d" , state);
+			LOGGER.info(deviceStateStr);
+			String deviceStateMsgStr = String.format("Device State Msg: %s", keyStore.getDeviceState(state));
+			LOGGER.info(deviceStateMsgStr);
 		}
 		else
 			LOGGER.warning("Inavlid device state...");
@@ -180,16 +186,20 @@ public class IntegrationTests {
 	
 	private static void testDeviceInfoJSON(){
 		String deviceInfoJson = keyStore.getDeviceInfo();
-		if(deviceInfoJson != null)
-			LOGGER.info(String.format("DeviceInfo: %s", deviceInfoJson));
+		if(deviceInfoJson != null) {
+			String deviceInfoStr = String.format("DeviceInfo: %s", deviceInfoJson);
+			LOGGER.info(deviceInfoStr);
+		}
 		else
 			LOGGER.warning("DeviceInfoJason is NULL");
 	}
 	
 	private static void testQRCodeGenerationAndRetrieveal(){
 		byte[] qrCodeBytes = keyStore.getQRCode();
-		if(qrCodeBytes != null)
-			LOGGER.info(String.format("Number of bytes in QRCode: %d", qrCodeBytes.length));
+		if(qrCodeBytes != null) {
+			String qrcodeBytesLength = String.format("Number of bytes in QRCode: %d", qrCodeBytes.length);
+			LOGGER.info(qrcodeBytesLength);
+		}
 		else
 			LOGGER.warning("QRCode bytes are empty");
 	}
@@ -198,14 +208,18 @@ public class IntegrationTests {
 		//botService.setHTTPS(false);
 		try {
 			String response = botService.get("/pair");
-			if(response != null)
-				LOGGER.info(String.format("Device Pair Status: %s", response));
+			if(response != null) {
+				String pairStatusMsg = String.format("Device Pair Status: %s", response);
+				LOGGER.info(pairStatusMsg);
+			}
 			else
 				LOGGER.warning("BotService GET response is NULL for /pair");
 			
 			response = botService.get("/actions");
-			if(response != null)
-				LOGGER.info(String.format("Actions from Server: \n %s \n", response));
+			if(response != null) {
+				String actionsData = String.format("Actions from Server: %s", response);
+				LOGGER.info(actionsData);
+			}
 			else
 				LOGGER.warning("BotService GET response is NULL for /actions");
 		}
@@ -218,8 +232,10 @@ public class IntegrationTests {
 		String actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
 		LOGGER.info(String.format("Trigger action for %s", actionId));
 		String response = botService.post("/actions", actionId);
-		if(response != null)
-			LOGGER.info(String.format("Response from HTTP Post Execution: %s", response));
+		if(response != null) {
+			String postResponseData = String.format("Response from HTTP Post Execution: %s", response);
+			LOGGER.info(postResponseData);
+		}
 		else
 			LOGGER.warning("Response from HTTP Post is NULL for /actions");
 	}
@@ -235,7 +251,8 @@ public class IntegrationTests {
 	private static void testGetActions(){
 	   List<ActionDTO> actions = actionService.getActions();
 	   if(actions != null) {
-		   LOGGER.info(String.format("Number of Actions Retrieved: %d", actions.size()));
+		   String actionsCountStr = String.format("Number of Actions Retrieved: %d", actions.size());
+		   LOGGER.info(actionsCountStr);
 		   for(ActionDTO action:actions){
 			   LOGGER.info(String.format("%s:%s:%s",action.getActionID(),action.getActionName(),action.getFrequency()));
 		   }
