@@ -239,30 +239,6 @@ public class IntegrationTests {
 		String actionId = "E6509B49-5048-4151-B965-BB7B2DBC7905";
 		LOGGER.info(String.format("Response from postAction for always valid action: %s",
 				                                 actionService.triggerAction(actionId)));
-		actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
-		LOGGER.info(String.format("Response from postAction for minutely action: %s",
-				                                 actionService.triggerAction(actionId)));
-		actionId = "749081B8-664D-4A15-908E-1C3F6590930D";
-		LOGGER.info(String.format("Response from postAction for hourly action: %s",
-				                                 actionService.triggerAction(actionId)));
-		actionId = "81F6011A-9AF0-45AE-91CD-9A0CDA81FA1F";
-		LOGGER.info(String.format("Response from postAction for daily action: %s",
-				                                 actionService.triggerAction(actionId)));
-		actionId = "0BF5E8D2-9062-467E-BB19-88CB76D06F8E";
-		LOGGER.info(String.format("Response from postAction for weekly action: %s",
-				                                 actionService.triggerAction(actionId)));
-		actionId = "C257DB70-AE57-4409-B94E-678CB1567FA6";
-		LOGGER.info(String.format("Response from postAction for monthly action: %s",
-				                                 actionService.triggerAction(actionId)));
-		actionId = "D93F99E1-011B-4609-B04E-AEDBA98A7C5F";
-		LOGGER.info(String.format("Response from postAction for half-yearly action: %s",
-				                                 actionService.triggerAction(actionId)));
-		actionId = "0097430C-FA78-4087-9B78-3AC7FEEF2245";
-		LOGGER.info(String.format("Response from postAction for yearly action: %s",
-				                                 actionService.triggerAction(actionId)));
-		actionId = "A42ABD19-3226-47AB-8045-8129DBDF117F";
-		LOGGER.info(String.format("Response from postAction for invalid action: %s",
-				                                 actionService.triggerAction(actionId)));
 	}
 	private static void printDeviceConfigInfo() {
 		LOGGER.info(String.format("MakerID: %s", keyStore.getMakerId()));
