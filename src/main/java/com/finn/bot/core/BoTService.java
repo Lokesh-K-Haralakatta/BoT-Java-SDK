@@ -31,6 +31,7 @@ import javax.net.ssl.SSLSession;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -54,7 +55,7 @@ import com.google.gson.GsonBuilder;
 
 public class BoTService {
 	//Class Logger Instance
-	private final static Logger LOGGER = Logger.getLogger(BoTService.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(BoTService.class.getName());
 	
 	//KeyStore Instance 
 	private final KeyStore keyStore = KeyStore.getKeyStoreInstance();
@@ -63,12 +64,16 @@ public class BoTService {
 	private static BoTService instance = new BoTService();
 	
 	//BoT Service related constants
-	private final static String HOST = "iot.bankingofthings.io"; 
-	private final static String URI = "";
+	private static final String HOST = "iot.bankingofthings.io"; 
+	private static final String URI = "";
 	
 	//Root CA SSL Finger Print Values
-	private final static String ROOT_CA_FP_SHA1 = "76e6b6df6d3b4d2d48d1b632add68e80533f5f88"; 
-	private final static String ROOT_CA_FP_SHA256 = "56785dc285744405dca2dc37c8660ee591dfc73a7def24c4f3416250ac83e0b9";
+	private static final String ROOT_CA_FP_SHA1 = "76e6b6df6d3b4d2d48d1b632add68e80533f5f88"; 
+	private static final String ROOT_CA_FP_SHA256 = "56785dc285744405dca2dc37c8660ee591dfc73a7def24c4f3416250ac83e0b9";
+	
+	//MD Algorithms
+	private static final String sha1Algorithm = "SHA-1";
+	private static final String sha256Algorithm = "SHA-256";
 	
 	//Flag to enable or disable HTTP Secure Communication
 	private static Boolean https = true;
@@ -82,16 +87,6 @@ public class BoTService {
 	//Public method to return reference to single BoTService instance always
 	public static BoTService getBoTServiceInstance(){
 		return instance;
-	}
-	
-	//Method to set HTTPS Flag to given value
-	public void setHTTPS(final Boolean https){
-		BoTService.https = https;
-	}
-	
-	//Method to return HTTPS Flag value
-	public Boolean getHTTPS(){
-		return BoTService.https;
 	}
 	
 	//Private method to build complete URL and return based on value in flag - https
@@ -119,7 +114,7 @@ public class BoTService {
 
 	                // get the server certificates from the SSLSession
 	                Certificate[] certificates = sslSession.getPeerCertificates();
-	                LOGGER.config("Count of collected certificates from SSLSession: " +certificates.length);
+	                LOGGER.config(String.format("Count of collected certificates from SSLSession: %d", certificates.length));
 	                // add the certificates to the context, where we can later grab it from
 	                context.setAttribute("PEER_CERTIFICATES", certificates);
 	                LOGGER.config("Added collected PEER_CERTIFICATES to context");
@@ -141,6 +136,38 @@ public class BoTService {
 		return httpclient;
 	}
 	
+	//Method to process the response entity and return the response body contents
+	private synchronized String processResponseEntity(final CloseableHttpResponse response) 
+		throws NoSuchAlgorithmException, InvalidKeySpecException, ParseException, IOException {
+		String responseBody = null;
+		HttpEntity responseEntity = response.getEntity();  
+		if(responseEntity != null){
+        	responseBody = EntityUtils.toString(responseEntity);
+        	LOGGER.config(String.format("Response Body Contents: %s", responseBody));
+        }
+        
+        //Check the response code and respond back
+        int statusCode = response.getStatusLine().getStatusCode();
+        if( statusCode == 200){
+        	LOGGER.config("HTTP Call Succeeded...");
+        	responseBody = decodeJWT(responseBody);
+        	if(responseBody != null)
+        		LOGGER.config(String.format("HTTP Call BoT Value: %s", responseBody));
+        }
+        else {
+        	String failedMsg = String.format("HTTP Call with failed with StatusCode: %d", statusCode);
+        	if(responseBody == null)
+        		responseBody = failedMsg;
+        	else{
+        		failedMsg = String.format("HTTP Call with failed with StatusCode: %d." +
+	                                      " with response: ", statusCode, decodeJWT(responseBody));
+        		responseBody = failedMsg;
+        	}	
+        	LOGGER.severe(responseBody);
+        }
+        return responseBody;
+	}
+	
 	//Method to execute HTTP Get call on provided end point
 	public synchronized String get(final String endPoint) throws KeyManagementException, NoSuchAlgorithmException, 
 	                   IOException, CertificateException {
@@ -149,7 +176,7 @@ public class BoTService {
 		Boolean fingerPrintStatus = false;
 		
 		String completeURL = buildCompleteURL(endPoint);
-		LOGGER.config("Constructed complete URL: " +completeURL);
+		LOGGER.config(String.format("Constructed complete URL: %s", completeURL));
 		
 		CloseableHttpClient httpclient = getHTTPClient();
 		LOGGER.config("Got HTTP Client Instance");
@@ -161,7 +188,7 @@ public class BoTService {
             httpget.addHeader("deviceID", keyStore.getDeviceId());
             
             //Execute HTTP GET
-            LOGGER.config("Executing request " + httpget.getRequestLine());
+            LOGGER.config(String.format("Executing request %s", httpget.getRequestLine()));
             CloseableHttpResponse response = null;
             if(https){
             	// create http context where the certificate will be added
@@ -179,29 +206,7 @@ public class BoTService {
             	response = httpclient.execute(httpget);
             
           //Extract Response Contents
-            HttpEntity responseEntity = response.getEntity();
-            if(responseEntity != null){
-            	responseBody = EntityUtils.toString(responseEntity);
-            	LOGGER.config("GET Response Body Contents: \n" +responseBody + "\n");
-            }
-            
-            //Check the response code and respond back
-            int statusCode = response.getStatusLine().getStatusCode();
-            if( statusCode == 200){
-            	LOGGER.config("HTTP GET Call Succeeded...");
-            	responseBody = decodeJWT(responseBody);
-            	LOGGER.config("HTTP GET Call BoT Value: "+responseBody);
-            }
-            else {
-            	if(responseBody == null)
-            		responseBody = "HTTP GET Call with URL: " +completeURL+" Failed with StatusCode: " +statusCode;
-            	else{
-            		responseBody = "HTTP GET Call with URL: " +completeURL+" Failed with StatusCode: " 
-            	                     +statusCode + " with response: " +decodeJWT(responseBody);
-            	}	
-            	LOGGER.severe(responseBody);
-            }
-            
+          responseBody = processResponseEntity(response);
         }
 		catch(Exception e){
 			LOGGER.severe("Exception caught duirng performing GET Call with BoT Service");
@@ -225,10 +230,8 @@ public class BoTService {
         String fpSha1 = null;
         String fpSha256 = null;
         for (Certificate certificate : peerCertificates){
-            fpSha1 = getSSLFingerPrint((X509Certificate)certificate,"SHA-1");
-            fpSha256 = getSSLFingerPrint((X509Certificate)certificate,"SHA-256");
-            LOGGER.config("SHA-1: "+fpSha1);
-            LOGGER.config("SHA-256: "+fpSha256);
+            fpSha1 = getSSLFingerPrint((X509Certificate)certificate,sha1Algorithm);
+            fpSha256 = getSSLFingerPrint((X509Certificate)certificate,sha256Algorithm);
             if(fpSha1.equals(ROOT_CA_FP_SHA1) && fpSha256.equals(ROOT_CA_FP_SHA256)){
             	return true;
             }
@@ -244,9 +247,9 @@ public class BoTService {
     	     
     	MessageDigest md = null;
     	switch(mdType){
-    	  case "SHA-1" : md = MessageDigest.getInstance("SHA-1"); break;
-    	  case "SHA-256" : md = MessageDigest.getInstance("SHA-256"); break;
-    	  default: md = MessageDigest.getInstance("SHA-1"); break;
+    	  case sha1Algorithm : md = MessageDigest.getInstance(sha1Algorithm); break;
+    	  case sha256Algorithm : md = MessageDigest.getInstance(sha256Algorithm); break;
+    	  default: md = MessageDigest.getInstance(sha1Algorithm); break;
     	}
     	     
     	byte[] der = cert.getEncoded();
@@ -274,7 +277,7 @@ public class BoTService {
 		Boolean fingerPrintStatus = false;
 		
 		String completeURL = buildCompleteURL(endPoint);
-		LOGGER.config("Constructed complete URL: " +completeURL);
+		LOGGER.config(String.format("Constructed complete URL: %s", completeURL));
 		
 		CloseableHttpClient httpclient = getHTTPClient();
 		LOGGER.config("Got HTTP Client Instance");
@@ -287,7 +290,7 @@ public class BoTService {
 			String signedToken = endPoint.equalsIgnoreCase("/actions")?signPayload(actionId):signPayload(endPoint);
 			PostBodyItem body = new PostBodyItem(signedToken);
 			String bodyStr = jsonObject.toJson(body);
-			LOGGER.config("Prepared body contents for POST Call: "+bodyStr);
+			LOGGER.config(String.format("Prepared body contents for POST Call: %s", bodyStr));
 			StringEntity entity = new StringEntity(bodyStr);
 			httpPost.setEntity(entity);
 
@@ -297,7 +300,7 @@ public class BoTService {
             httpPost.addHeader("Content-Type", "application/json");
             
             //Execute HTTP POST
-            LOGGER.config("Executing request " + httpPost.getRequestLine());
+            LOGGER.config(String.format("Executing request %s", httpPost.getRequestLine()));
             CloseableHttpResponse response = null;
             if(https){
             	// create http context where the certificate will be added
@@ -315,28 +318,7 @@ public class BoTService {
             	response = httpclient.execute(httpPost);
             
             //Extract Response Contents
-            HttpEntity responseEntity = response.getEntity();
-            if(responseEntity != null){
-            	responseBody = EntityUtils.toString(responseEntity);
-            	LOGGER.config("POST Response Body Contents: " +responseBody);
-            }
-            
-            //Check the response code and respond back
-            int statusCode = response.getStatusLine().getStatusCode();
-            if( statusCode == 200){
-            	LOGGER.config("HTTP POST Call Succeeded...");
-            	responseBody = decodeJWT(responseBody);
-            	LOGGER.config("HTTP Post Call BoT Value: "+responseBody);
-            }
-            else {
-            	if(responseBody == null)
-            		responseBody = "HTTP POST Call with URL: " +completeURL+" Failed with StatusCode: " +statusCode;
-            	else{
-            		responseBody = "HTTP POST Call with URL: " +completeURL+" Failed with StatusCode: " 
-            	                     +statusCode + " with response: " +decodeJWT(responseBody);
-            	}	
-            	LOGGER.severe(responseBody);
-            }
+            responseBody = processResponseEntity(response);
 		}
 		catch(Exception e){
 			LOGGER.severe("Exception caught during performing POST Call with BoT Service");
@@ -368,14 +350,14 @@ public class BoTService {
 			LOGGER.config("Got public key from keysStore and loaded using X509 Spec");
 			
 			// Prepare JWT Header
-			Map<String,String> jwtHeader = new HashMap<String,String>();
+			Map<String,String> jwtHeader = new HashMap<>();
 			jwtHeader.put("typ", "JWT");
 			jwtHeader.put("alg", "RS256");
 			String jwtHdrStr = jsonObject.toJson(jwtHeader);
-			LOGGER.config("JWT Header String: "+jwtHdrStr);
+			LOGGER.config(String.format("JWT Header String: %s", jwtHdrStr));
 			
 			// Prepare JWT Data
-			Map<String,JWTItems> payloadHash = new HashMap<String,JWTItems>();
+			Map<String,JWTItems> payloadHash = new HashMap<>();
 			JWTItems items = null;
 			if(keyStore.getDeviceState() == KeyStore.DEVICE_MULTIPAIR)
 				items = new JWTItems(actionId,keyStore.getDeviceId(),keyStore.generateUUID4(), keyStore.getDeviceAltId());
@@ -384,7 +366,7 @@ public class BoTService {
 			
 			payloadHash.put("bot", items);
 			String payloadStr = jsonObject.toJson(payloadHash);
-			LOGGER.config("Payload Data String: "+payloadStr);
+			LOGGER.config(String.format("Payload Data String: %s", payloadStr));
 			
 			// Encode JWT Header and JWT Data in Base64
 			String encHeader = Base64.getEncoder().encodeToString(jwtHdrStr.getBytes(StandardCharsets.UTF_8));
@@ -399,7 +381,7 @@ public class BoTService {
 	        
 	        // Get encoded token in JWT format
 	        encodedToken = String.format("%s.%s.%s", encHeader, encPayload, signature);
-			LOGGER.config("Encoded Token: " +encodedToken);
+			LOGGER.config(String.format("Encoded Token: %s", encodedToken));
 		}
 		
 		return encodedToken;
@@ -424,7 +406,7 @@ public class BoTService {
 				try {
 					DecodedJWT jwt = verifier.verify(token);
 					botValue = jwt.getClaim("bot").asString();
-					LOGGER.config("BoT Value: " +botValue);
+					LOGGER.config(String.format("BoT Value: %s", botValue));
 				}
 				catch(JWTVerificationException e){
 					LOGGER.severe("Exception caught while verifying JWT Token");

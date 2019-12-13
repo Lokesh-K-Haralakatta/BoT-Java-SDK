@@ -14,8 +14,6 @@ public class DeviceInfo {
 	private Integer multipair;
 	private String aid;
 	
-	public DeviceInfo() {}
-	
 	public void setDeviceId(final String dID){
 		this.deviceID = dID;
 	}

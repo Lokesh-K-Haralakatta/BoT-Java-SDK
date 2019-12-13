@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.finn.bot.api.SDKWrapper;
 import com.finn.bot.core.BoTService;
 import com.finn.bot.service.ActionService;
@@ -40,6 +42,9 @@ public class IntegrationTests {
     private static ActionService actionService = ActionService.getActionServiceInstance();
     private static ConfigurationService configService = ConfigurationService.getConfigurationServiceInstance();
     private static BLEService bleService = BLEService.getBLEServiceInstance();
+    
+    //Declare MakerID Constant to avoid duplicate code
+    private static final String MAKER_ID = "469908A3-8F6C-46AC-84FA-4CF1570E564B";
     //Independent test modules
 	private static void testActionsStore(){
 		KeyStore keyStore = KeyStore.getKeyStoreInstance();
@@ -200,7 +205,7 @@ public class IntegrationTests {
 				LOGGER.warning("BotService GET response is NULL for /actions");
 		}
 		catch(Exception e){
-			e.printStackTrace();
+			LOGGER.severe("Exception thrown with BoT HTTP Get request: \n" + ExceptionUtils.getStackTrace(e));
 		}
 	}
 	private static void testBoTHttpPost() throws KeyManagementException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
@@ -254,7 +259,7 @@ public class IntegrationTests {
 		configService.resetDeviceConfiguration(true,true);
 		printDeviceConfigInfo();
 		//Initialize device with new deviceID and single pair
-		configService.initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", null, true, false, null);
+		configService.initializeDeviceConfiguration(MAKER_ID, null, true, false, null);
 		printDeviceConfigInfo();
 		//Call configureDevice with device state as NEW
 		configService.configureDevice();
@@ -268,7 +273,7 @@ public class IntegrationTests {
 		configService.resetDeviceConfiguration(false, false);
 		printDeviceConfigInfo();
 		//Initialize device with existing deviceID and multi pair
-		configService.initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", "MP-Device", true, true, "RPI-Java-MLP");
+		configService.initializeDeviceConfiguration(MAKER_ID, "MP-Device", true, true, "RPI-Java-MLP");
 		printDeviceConfigInfo();
 		//Call configureDevice with device state as MULTIPAIR
 		configService.configureDevice();
@@ -282,7 +287,7 @@ public class IntegrationTests {
 		LOGGER.info("Device Configuration after reseting existing configuration: ");
 		printDeviceConfigInfo();
 		//Initialize device with new deviceID and single pair
-		configService.initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", null, true, false, null);
+		configService.initializeDeviceConfiguration(MAKER_ID, null, true, false, null);
 		LOGGER.info("Device Configuration after initializing for Single Pair: ");
 		printDeviceConfigInfo();
 		//Call executeBLENOService method to start bleno-service.js
@@ -294,7 +299,7 @@ public class IntegrationTests {
 		LOGGER.info("Device Configuration after reseting existing configuration: ");
 		printDeviceConfigInfo();
 		//Initialize device with new deviceID and multi pair
-		configService.initializeDeviceConfiguration("469908A3-8F6C-46AC-84FA-4CF1570E564B", null, true, true, "RPI-Java-MLP");
+		configService.initializeDeviceConfiguration(MAKER_ID, null, true, true, "RPI-Java-MLP");
 		LOGGER.info("Device Configuration after initializing for Single Pair: ");
 		printDeviceConfigInfo();
 		//Call executeBLENOService method to start bleno-service.js
@@ -309,10 +314,12 @@ public class IntegrationTests {
 	private static void testSDKWrapperPairActivate() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InterruptedException, IOException, WriterException{
 		//Retrieving actions from server
 		LOGGER.info(String.format("Total actions retrieved: %d", SDKWrapper.getActions().size()));
+		
 		//Reset device configuration if required
-		//SDKWrapper.resetDeviceConfiguration(true, true);
+		SDKWrapper.resetDeviceConfiguration(true, true);
+		
 		//Testing device pair and activation for payments
-		if(SDKWrapper.pairAndActivateDevice("469908A3-8F6C-46AC-84FA-4CF1570E564B", 
+		if(SDKWrapper.pairAndActivateDevice(MAKER_ID, 
                 "RPI-Zero-Java", true, false, null))
 			LOGGER.info("SDKWrapper.pairAndActivateDevice Success");
 		else
@@ -320,34 +327,37 @@ public class IntegrationTests {
 	}
 	private static void testSDKWrapperPairActivateMultiPair() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, InterruptedException, IOException, WriterException{
 		//Reset device configuration if required
-		//SDKWrapper.resetDeviceConfiguration(true, true);
+		SDKWrapper.resetDeviceConfiguration(true, true);
+		
 		//Testing device pair and activation for payments of Multipair device
-		if(SDKWrapper.pairAndActivateDevice("469908A3-8F6C-46AC-84FA-4CF1570E564B", 
+		if(SDKWrapper.pairAndActivateDevice(MAKER_ID, 
                 "RPI-Zero-Java-MP", true, true, "Java-MPD"))
 			LOGGER.info("SDKWrapper.pairAndActivateDevice Success");
 		else
 			LOGGER.info("SDKWrapper.pairAndActivateDevice Failed!!!");
 	}	
 	private static void testSDKWrapperTriggerAction(){
+		final String UNKNOWN_ACTION = "unknownAction";
+		
 		//Try to call triggerAction with actionId as null or zero length
-		SDKWrapper.triggerAction("", 0.0);
+		SDKWrapper.triggerAction("");
 		//Try to call triggerAction with device state as new
 		int deviceState = keyStore.getDeviceState();
 		keyStore.setDeviceState(KeyStore.DEVICE_NEW);
-		SDKWrapper.triggerAction("unknownAction", 0.0);
+		SDKWrapper.triggerAction(UNKNOWN_ACTION);
 		//Try to call triggerAction with empty alternate device id for multipair device
 		keyStore.setDeviceState(KeyStore.DEVICE_MULTIPAIR);
 		String altId = keyStore.getDeviceAltId();
 		keyStore.setDeviceAltId("");
-		SDKWrapper.triggerAction("unknownAction", 0.0);
+		SDKWrapper.triggerAction(UNKNOWN_ACTION);
 		//Resotre the device state
 		keyStore.setDeviceAltId(altId);
 		keyStore.setDeviceState(deviceState);
 		//Trigger the unknown action with the original device state
-		SDKWrapper.triggerAction("unknownAction", 0.0);
+		SDKWrapper.triggerAction(UNKNOWN_ACTION);
 		//Trigger the valid action with the original device state
 		String actionId = "E6509B49-5048-4151-B965-BB7B2DBC7905";
-		if(SDKWrapper.triggerAction(actionId, 0.0))
+		if(SDKWrapper.triggerAction(actionId))
 			LOGGER.info("Triggering valid action successful");
 		else
 			LOGGER.info("Triggering valid action failed!!!");

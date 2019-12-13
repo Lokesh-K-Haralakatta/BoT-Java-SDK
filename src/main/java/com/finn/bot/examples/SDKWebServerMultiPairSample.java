@@ -51,24 +51,28 @@ public class SDKWebServerMultiPairSample {
 	private static final Logger LOGGER = Logger.getLogger(SDKWebServerMultiPairSample.class.getName());
 	
 	//Default SDK Log file path
-	private static final String logFile = "/tmp/java-sdk.log.*";
+	private static final String LOG_FILE = "/tmp/java-sdk.log.*";
 	
 	//Static constants
-	private static final String makerId = "469908A3-8F6C-46AC-84FA-4CF1570E564B";
-	private static final String deviceName = "SDKWebServerMultiPairSample-1";
-	private static final String actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
-	private static final Boolean generateDeviceId = true;
-	private static final Boolean deviceMultiPair = true;
-	private static final String alternateDeviceId = "SDKWebServerMP-1";
-	private static final Integer actionTriggerInterval = 5 * 60 * 1000;
-	private static final String actionsEndpoint = "/actions";
-	private static final String pairingEndpoint = "/pairing";
-	private static final String qrcodeEndpoint = "/qrcode";
+	private static final String MAKER_ID = "469908A3-8F6C-46AC-84FA-4CF1570E564B";
+	private static final String DEVICE_NAME = "SDKWebServerMultiPairSample-1";
+	private static final String ACTION_ID = "A42ABD19-3226-47AB-8045-8129DBDF117E";
+	private static final Boolean GEN_DEVICE_ID = true;
+	private static final Boolean DEVICE_MP = true;
+	private static final String ALT_DEVICE_ID = "SDKWebServerMP-1";
+	private static final Integer TRIGGER_INTERVAL = 5 * 60 * 1000;
+	
+	//Webserver endpoints for consumption
+	private static final String ACTIONS_ENDPOINT = "/actions";
+	private static final String PAIRING_ENDPOINT = "/pairing";
+	private static final String QRCODE_ENDPOINT = "/qrcode";
 	
 	//Base URL for Embed WebServer
-	private static final String ipAddress = "";
-	private static final int port = 3001;
-	private static String baseUrl = "http://" + ipAddress + ":" + port;
+	private static final String IP_ADDRESS = "";
+	private static final int PORT_NUMBER = 3001;
+	
+	//COnstruct baseURL using IP and PORT values
+	private static String baseUrl = "http://" + IP_ADDRESS + ":" + PORT_NUMBER;
 	
 	//Payments counters
 	private static Integer actionTriggerSucceeded = 0;
@@ -83,7 +87,7 @@ public class SDKWebServerMultiPairSample {
 	//Adding private constructor to avoid creation of instance
 	private SDKWebServerMultiPairSample() {}
 	
-	//Method to put get request to the Server through embed WebServer EndPoint /pairing
+	//Method to place get request to the Server through embed WebServer EndPoint
 	private static String getRequest(final String endPoint) throws IOException{
 		String responseBody = null;
 		String url = baseUrl+endPoint;
@@ -102,7 +106,7 @@ public class SDKWebServerMultiPairSample {
             HttpEntity responseEntity = response.getEntity();
             if(responseEntity != null){
             	responseBody = EntityUtils.toString(responseEntity);
-            	String resBodyContents = String.format("GET Response Body Contents: \n %s \n", responseBody);
+            	String resBodyContents = String.format("GET Response Body Contents: %s", responseBody);
             	LOGGER.config(resBodyContents);
             }
 		}
@@ -124,7 +128,7 @@ public class SDKWebServerMultiPairSample {
 		throws InterruptedException, NoSuchProviderException, NoSuchAlgorithmException, 
 		InvalidKeySpecException, CertificateException, IOException, WriterException{
 		
-		String url = baseUrl+qrcodeEndpoint;
+		String url = baseUrl+QRCODE_ENDPOINT;
 		Boolean devicePaired = false;
 		if(keyStore.getDeviceState() != KeyStore.DEVICE_INVALID && keyStore.getDeviceState() == KeyStore.DEVICE_MULTIPAIR){
 			LOGGER.info("Device is Multipair device");
@@ -136,7 +140,7 @@ public class SDKWebServerMultiPairSample {
 			String pairMsg = String.format("Access QrCode for the device from URL: %s and " + 
 			                                        "Pair using FINN Mobile Application", url);
 			LOGGER.info(pairMsg);
-			String pairingResponse = getRequest(pairingEndpoint);
+			String pairingResponse = getRequest(PAIRING_ENDPOINT);
 			devicePaired = pairingResponse != null && ( pairingResponse.contains("Device pairing successful")
 					                                    || pairingResponse.contains("Device is Multipair"));
 		}
@@ -148,7 +152,7 @@ public class SDKWebServerMultiPairSample {
 	//Static Method to trigger action using /actions end point
 	private static Boolean triggerAction(final String actionString) throws IOException{
 		String responseBody = null;
-		String url = baseUrl+actionsEndpoint;
+		String url = baseUrl+ACTIONS_ENDPOINT;
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		Boolean triggerResult = false;
 		try {
@@ -173,7 +177,7 @@ public class SDKWebServerMultiPairSample {
             	responseBody = EntityUtils.toString(responseEntity);
             	String resBodyContents = String.format("Post Response Body Contents: \n %s \n", responseBody);
             	LOGGER.config(resBodyContents);
-            	triggerResult = response.getStatusLine().getStatusCode() == 200 ? true : false;
+            	triggerResult = response.getStatusLine().getStatusCode() == 200 ;
             }
 		}
 		catch(Exception e){
@@ -197,13 +201,13 @@ public class SDKWebServerMultiPairSample {
 			configService.resetDeviceConfiguration(resetDeviceID, resetDeviceName);
 			LOGGER.info("Device Configuration reset done");
 			
-			if(pairAndActivateDevice(makerId, deviceName, generateDeviceId, deviceMultiPair, alternateDeviceId)) {
+			if(pairAndActivateDevice(MAKER_ID, DEVICE_NAME, GEN_DEVICE_ID, DEVICE_MP, ALT_DEVICE_ID)) {
 				LOGGER.info("Device pair and activation successful, proceeding with payments...");
 				Type listType = new TypeToken<List<ActionDTO>>() {}.getType();
-				List<ActionDTO> actions = new Gson().fromJson(getRequest(actionsEndpoint), listType);
+				List<ActionDTO> actions = new Gson().fromJson(getRequest(ACTIONS_ENDPOINT), listType);
 				String actionsCount = String.format("Number of actions retrieved from Server: %s" , actions.size());
 				LOGGER.info(actionsCount);
-				String actionStr = "{\" actionID \" : \"" + actionId + "\" } ";
+				String actionStr = "{\" actionID \" : \"" + ACTION_ID + "\" } ";
 				do {
 					if(triggerAction(actionStr))
 						actionTriggerSucceeded++;
@@ -216,12 +220,12 @@ public class SDKWebServerMultiPairSample {
 					LOGGER.info(failedActions);
 					LOGGER.info("Press Ctrl + C to quit the sample");
 				
-					Thread.sleep(actionTriggerInterval);
+					Thread.sleep(TRIGGER_INTERVAL);
 
 				}while(true);
 			}
 			else {
-				LOGGER.warning("Device Pairing Failed, check the log for details: " + logFile);
+				LOGGER.warning("Device Pairing Failed, check the log for details: " + LOG_FILE);
 			}
 			
 		}
