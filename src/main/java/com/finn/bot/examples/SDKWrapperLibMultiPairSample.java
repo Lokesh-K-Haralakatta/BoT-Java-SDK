@@ -28,23 +28,26 @@ import com.finn.bot.store.ActionDTO;
 */
 public class SDKWrapperLibMultiPairSample {
 	//Class Logger Instance
-	private final static Logger LOGGER = Logger.getLogger(SDKWrapperLibMultiPairSample.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SDKWrapperLibMultiPairSample.class.getName());
 
 	//Default SDK Log file path
-	private final static String logFile = "/tmp/java-sdk.log.*";
+	private static final String LOG_FILE = "/tmp/java-sdk.log.*";
 	
 	//Static constants
-	private final static String makerId = "469908A3-8F6C-46AC-84FA-4CF1570E564B";
-	private final static String deviceName = "SDKWrapperLibMultiPairSample-1";
-	private final static String actionId = "A42ABD19-3226-47AB-8045-8129DBDF117E";
-	private final static Boolean generateDeviceId = true;
-	private final static Boolean deviceMultiPair = true;
-	private final static String alternateDeviceId = "SDKWrapperMP-1";
-	private final static Integer actionTriggerInterval = 5 * 60 * 1000;
+	private static final String MAKER_ID = "469908A3-8F6C-46AC-84FA-4CF1570E564B";
+	private static final String DEVICE_NAME = "SDKWrapperLibMultiPairSample-1";
+	private static final String ACTION_ID = "A42ABD19-3226-47AB-8045-8129DBDF117E";
+	private static final Boolean GEN_DEVICE_ID = true;
+	private static final Boolean DEVICE_MP = true;
+	private static final String ALT_DEVICE_ID= "SDKWrapperMP-1";
+	private static final Integer TRIGGER_INTERVAL = 5 * 60 * 1000;
 	
 	//Payments counters
 	private static Integer actionTriggerSucceeded = 0;
 	private static Integer actionTriggerFailed = 0;	
+	
+	//Private constructor
+	private SDKWrapperLibMultiPairSample() { }
 	
 	public static void run() {
 		try {
@@ -57,30 +60,32 @@ public class SDKWrapperLibMultiPairSample {
 			
 			//Pair the device using BLE with the FINN Mobile Application
 			LOGGER.info("Pairing and Activating the device through BLE, if not already done");
-			if(SDKWrapper.pairAndActivateDevice(makerId, 
-	                  deviceName, generateDeviceId, deviceMultiPair, alternateDeviceId)){
+			if(SDKWrapper.pairAndActivateDevice(MAKER_ID, 
+	                  DEVICE_NAME, GEN_DEVICE_ID, DEVICE_MP, ALT_DEVICE_ID)){
 				LOGGER.info("Device Successfully paired and activated for autonomous payments");
-				LOGGER.info("Triggering the action with actionId: " + actionId);
+				LOGGER.info("Triggering the action with actionId: " + ACTION_ID);
 				List<ActionDTO> actions = SDKWrapper.getActions();
-				if(isActionDefinedWithServer(actions,actionId)){
+				if(isActionDefinedWithServer(actions,ACTION_ID)){
 					do {
-							if(SDKWrapper.triggerAction(actionId, 0.0))
+							if(SDKWrapper.triggerAction(ACTION_ID))
 								actionTriggerSucceeded++;
 							else
 								actionTriggerFailed++;
 						
-							LOGGER.info("Action triggers success in this session: " + actionTriggerSucceeded);
-							LOGGER.info("Action triggers failed in this session: " + actionTriggerFailed);
+							String successActions = String.format("Action triggers success in this session: %s" , actionTriggerSucceeded);
+							String failedActions = String.format("Action triggers failed in this session: %s" , actionTriggerFailed);
+							LOGGER.info(successActions);
+							LOGGER.info(failedActions);
 							LOGGER.info("Press Ctrl + C to quit the sample");
 						
-							Thread.sleep(actionTriggerInterval);
+							Thread.sleep(TRIGGER_INTERVAL);
 					}while(true);
 				}
 				else
-					LOGGER.warning("Given actionId: " + actionId + " not defined with the Server");
+					LOGGER.warning("Given actionId: " + ACTION_ID + " not defined with the Server");
 			}
 			else
-				LOGGER.warning("Device Pairing Failed, check the log for details: " + logFile);
+				LOGGER.warning("Device Pairing Failed, check the log for details: " + LOG_FILE);
 		}
 		catch(Exception e){
 			LOGGER.severe("Exception while running SDKWrapperLibSample: \n" + ExceptionUtils.getStackTrace(e));

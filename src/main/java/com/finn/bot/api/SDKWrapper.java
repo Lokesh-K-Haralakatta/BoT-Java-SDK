@@ -24,7 +24,7 @@ import com.google.zxing.WriterException;
 
 public class SDKWrapper {
 	//Class Logger Instance
-	private final static Logger LOGGER = Logger.getLogger(SDKWrapper.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SDKWrapper.class.getName());
 	
 	//KeyStore Instance
 	private static KeyStore keyStore = KeyStore.getKeyStoreInstance();
@@ -55,8 +55,8 @@ public class SDKWrapper {
 		throws InterruptedException, NoSuchProviderException, NoSuchAlgorithmException, 
 		InvalidKeySpecException, CertificateException, IOException, WriterException{
 		
-		Boolean devicePaired = false;
-		if(keyStore.getDeviceState() != KeyStore.DEVICE_INVALID && ( devicePaired = pairingService.isDevicePaired())){
+		Boolean devicePaired = pairingService.isDevicePaired();
+		if(keyStore.getDeviceState() != KeyStore.DEVICE_INVALID && devicePaired){
 			LOGGER.info("Device is already paired, proceeding with configuring the device for payments");
 			configService.configureDevice();
 		}
@@ -75,20 +75,21 @@ public class SDKWrapper {
 	//Static Method to verify the given action exists with the server
 	private static Boolean actionExistsWithServer(final String actionId){
 		List<ActionDTO> actions = actionService.getActions();
+		String searchResult = String.format("Given actionId: %s not found with actions retrieved from server",actionId);
 		for(ActionDTO action : actions){
 			String serverActionId = action.getActionID();
-			LOGGER.config("Server Action ID: " + serverActionId);
 			if(serverActionId.compareToIgnoreCase(actionId) == 0){
-				LOGGER.config("Given actionId: " + actionId + " found with actions retrieved from server");
+				searchResult = String.format("Given actionId: %s found with actions retrieved from server",actionId);
+				LOGGER.config(searchResult);
 				return true;
 			}
 		}
-		LOGGER.warning("Given actionId: " + actionId + " not found with actions retrieved from server");
+		LOGGER.warning(searchResult);
 		return false;
 	}
 	
 	//Static Method to trigger an action
-	public static boolean triggerAction(final String actionId, final Double value){
+	public static boolean triggerAction(final String actionId){
 		if( actionId == null || actionId.length() == 0){
 			LOGGER.severe("Action ID cannot be null or empty");
 			return false;
@@ -104,18 +105,17 @@ public class SDKWrapper {
 			return false;
 		}
 		else if(!actionExistsWithServer(actionId)){
-			LOGGER.severe("ActionId: "+ actionId + " does not exists with Server Actions");
+			LOGGER.severe(String.format("ActionId: %s does not exists with Server Actions", actionId));
 			return false;
 		}
 		else {
-			LOGGER.info("Triggering the action with actionID: " + actionId);
 			String response = actionService.triggerAction(actionId);
 			if(response != null && response.contains("status\":\"OK")){
-				LOGGER.info("Action trigger successfull for " + actionId);
+				LOGGER.info(String.format("Action trigger successfull for %s", actionId));
 				return true;
 			}
 			else {
-				LOGGER.severe("Action trigger failed with response: " + response);
+				LOGGER.severe(String.format("Action trigger failed with response: %s", response));
 				return false;
 			}
 			

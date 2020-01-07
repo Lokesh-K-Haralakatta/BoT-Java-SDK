@@ -17,7 +17,7 @@ import com.google.zxing.WriterException;
 
 public class ConfigurationService {
 	//Class Logger Instance
-	private final static Logger LOGGER = Logger.getLogger(ConfigurationService.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(ConfigurationService.class.getName());
 	
 	//KeyStore Instance 
 	private final KeyStore keyStore = KeyStore.getKeyStoreInstance();
@@ -47,7 +47,7 @@ public class ConfigurationService {
 			System.exit(1);
 		}
 		
-		LOGGER.config("Initializing the device with makerID: "+makerID);
+		LOGGER.config(String.format("Initializing the device with makerID: %s", makerID));
 		keyStore.setMakerId(makerID);
 		
 		if(!keyStore.isKeyPairGenerated()){
@@ -66,14 +66,14 @@ public class ConfigurationService {
 			keyStore.setDeviceId(keyStore.generateUUID4());
 		}
 		else
-			LOGGER.config("Reusing the existing deviceID present in KeyStore for the device: " +keyStore.getDeviceId());
+			LOGGER.config(String.format("Reusing the existing deviceID present in KeyStore for the device: %s", keyStore.getDeviceId()));
 		
 		//Handle deviceName for the device
 		if(deviceName != null)
 			keyStore.setDeviceName(deviceName);
 		else
 			keyStore.setDeviceName("BoT-Java-SDK-Device");
-		LOGGER.config("DeviceName set to: " +keyStore.getDeviceName());
+		LOGGER.config(String.format("DeviceName set to: %s", keyStore.getDeviceName()));
 		
 		//Handle device pair type and set device state accordingly
 		keyStore.setDeviceState(KeyStore.DEVICE_NEW);
@@ -83,9 +83,9 @@ public class ConfigurationService {
 			else
 				keyStore.setDeviceAltId("altID");
 			keyStore.setDeviceState(KeyStore.DEVICE_MULTIPAIR);
-			LOGGER.config("Device enabled for multipair with alternate deviceID: " + keyStore.getDeviceAltId());
+			LOGGER.config(String.format("Device enabled for multipair with alternate deviceID: %s", keyStore.getDeviceAltId()));
 		}
-		LOGGER.config("Device State set to " + keyStore.getDeviceState(keyStore.getDeviceState()));
+		LOGGER.config(String.format("Device State set to %s", keyStore.getDeviceState(keyStore.getDeviceState())));
 		
 		//Generate QRCode for the device if needed
 		if(!keyStore.isQRCodeGenerated()){
@@ -120,7 +120,8 @@ public class ConfigurationService {
 										 break;
 			case KeyStore.DEVICE_ACTIVE: LOGGER.config("Device is already active, enabled for autonomous payments");
 										 break;
-			case KeyStore.DEVICE_MULTIPAIR: LOGGER.config("Device is Multipair enabled, Alternate DeviceId: " + keyStore.getDeviceAltId());
+			case KeyStore.DEVICE_MULTIPAIR: LOGGER.config(String.format("Device is Multipair enabled, Alternate DeviceId: %s",
+					                                                                  keyStore.getDeviceAltId()));
 										 break;
             default:
             	     LOGGER.config("Device state is invalid, reset device configuration and try again!!!");

@@ -12,7 +12,7 @@ public class ActionDTO {
 	private String type;
 	private String info;
 	private String frequency;
-	private String date_created;
+	private String dateCreated;
 	
 	public void setMakerID(final String mID){
 		makerID = mID;
@@ -62,11 +62,11 @@ public class ActionDTO {
 		return frequency;
 	}
 	
-	public void setDate_created(final String aDate){
-		date_created = aDate;
+	public void setDateCreated(final String aDate){
+		dateCreated = aDate;
 	}
 	
-	public String getDate_created(){
-		return date_created;
+	public String getDateCreated(){
+		return dateCreated;
 	}
 }

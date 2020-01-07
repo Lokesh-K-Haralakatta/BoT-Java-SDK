@@ -43,12 +43,12 @@ import com.finn.bot.tests.IntegrationTests;
 @SpringBootApplication
 public class SDKMain {
 	//Class Logger Instance
-	private final static Logger LOGGER = Logger.getLogger(SDKMain.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SDKMain.class.getName());
 		
 	//Method to print usage format for Java SDK Main
 	private static void printUsage() {
-		System.out.println("Default Usage: java -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar [ config | server | tests | libSample | libMultiPairSample | serverSample | serverMultiPairSample ]");
-		System.out.println("Usage with JVM properties: java -Dbleno.service.path=bleo-service-path "
+		LOGGER.info("Default Usage: java -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar [ config | server | tests | libSample | libMultiPairSample | serverSample | serverMultiPairSample ]");
+		LOGGER.info("Usage with JVM properties: java -Dbleno.service.path=bleo-service-path "
 				+ " -Djava.util.logging.config.file=logging-properties-file "
 				+ " -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar [server | tests | libSample | serverSample]");		
 	}
@@ -61,14 +61,15 @@ public class SDKMain {
 	
 	//Method to return supported end points as single string message
 	private static String getEndpointsString(final String [] endPoints) {
-		String epString = " ";
+		StringBuilder epString = new StringBuilder();
 		for ( String ep : endPoints)
-			epString = epString + ep;
-		return epString;
+			epString.append(ep);
+		return epString.toString();
 	}
 	
 	public static void main(String[] args) {
 		final String [] endPoints = { "	/qrcode ", " /actions ", " /pairing ", " /activate " };
+		final String falseStr = "false";
 		String makerId = "";
 		String deviceName = "BoT-Device-"+getRandomIntegerBetweenRange(1,100);
 		Boolean generateDeviceId = true;
@@ -83,9 +84,11 @@ public class SDKMain {
 								makerId = System.getProperty("maker.id");
 								deviceName = System.getProperty("device.name", deviceName);
 								generateDeviceId = Boolean.valueOf(System.getProperty("generate.id", "true"));
-								multiPair = Boolean.valueOf(System.getProperty("multi.pair", "false"));
+								multiPair = Boolean.valueOf(System.getProperty("multi.pair", falseStr));
 								altId = System.getProperty("alternate.id", "");
-								LOGGER.info("MakerId: " + makerId + " DeviceName: " + deviceName + " Generate ID: " + generateDeviceId + " Multipair: " + multiPair + " AlternateId: " + altId);
+								String configStr = String.format("MakerId: %s DeviceName: %s Generate ID: %s  Multipair: %s AlternateId: %s",
+										                                              makerId, deviceName, generateDeviceId, multiPair,altId);
+								LOGGER.info(configStr);
 								try {
 									if(SDKWrapper.pairAndActivateDevice(makerId, 
 							                  deviceName, generateDeviceId, multiPair, altId)){
@@ -104,9 +107,10 @@ public class SDKMain {
 								break;
 				 
 				case "reset" : LOGGER.info("Reseting the device configuration with the given details: ");
-							   resetId = Boolean.valueOf(System.getProperty("reset.id", "false"));
-							   resetName = Boolean.valueOf(System.getProperty("reset.name", "false"));
-							   LOGGER.info("Reset Device ID: " + resetId + "  Reset Device Name: " + resetName);
+							   resetId = Boolean.valueOf(System.getProperty("reset.id", falseStr));
+							   resetName = Boolean.valueOf(System.getProperty("reset.name", falseStr));
+							   String resetStr = String.format("Reset Device ID: %s Reset Device Name: %s", resetId,resetName);
+							   LOGGER.info(resetStr);
 							   SDKWrapper.resetDeviceConfiguration(resetId, resetName);
 							   LOGGER.info("Device Configuration Reset Done");
 							   System.exit(0);
@@ -120,7 +124,7 @@ public class SDKMain {
 								System.exit(0);
 						  	  }
 						  	  catch(Exception e){
-							  	e.printStackTrace();
+						  		LOGGER.severe("Exception while running Integration Tests: \n" + ExceptionUtils.getStackTrace(e));
 							  	System.exit(1);
 						  	  }
 						  	  break;

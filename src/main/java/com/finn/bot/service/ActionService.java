@@ -21,7 +21,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class ActionService {
 	//Class Logger Instance
-	private final static Logger LOGGER = Logger.getLogger(ActionService.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(ActionService.class.getName());
 	
 	//KeyStore Instance 
 	private final KeyStore keyStore = KeyStore.getKeyStoreInstance();
@@ -32,8 +32,11 @@ public class ActionService {
 	//Instance for ActionService Class as it's designed to follow singleton pattern
 	private static ActionService instance = new ActionService();
 	
+	//NULL Action Message
+	private static final String NULL_ACTION_MSG = "ActionID can not be NULL";
+	
 	//Static final variables for ActionService
-	private final static String ACTIONS_END_POINT = "/actions";
+	private static final String ACTIONS_END_POINT = "/actions";
 	
 	//Make constructor as Private
 	private ActionService(){}
@@ -53,15 +56,18 @@ public class ActionService {
 			botResponse = bot.get(ACTIONS_END_POINT);
 			if(botResponse != null && !botResponse.contains("Failed with StatusCode:")){
 				actions = new Gson().fromJson(botResponse, listType);
-				LOGGER.config("Total number of actions retrieved from server: " +actions.size());
-				keyStore.saveActions(botResponse);
+				if(actions != null) {
+					LOGGER.config(String.format("Total number of actions retrieved from server: %d", actions.size()));
+					keyStore.saveActions(botResponse);
+				}
 			}
 			else {
 				LOGGER.warning("Failed to retrieve actions from Server, getting local actions...");
 				botResponse = keyStore.getActions();
 				if(botResponse != null){
 					actions = new Gson().fromJson(botResponse, listType);
-					LOGGER.config("Total number of actions retrieved from local store: " +actions.size());
+					if(actions != null)
+						LOGGER.config(String.format("Total number of actions retrieved from local store: " +actions.size()));
 				}
 			}
 		}
@@ -81,7 +87,7 @@ public class ActionService {
 	//Method to initiate action with the back end server and return the response
 	private synchronized String postAction(final String actionID){
 		if(actionID == null){
-			LOGGER.severe("ActionID can not be NULL");
+			LOGGER.severe(NULL_ACTION_MSG);
 			return null;
 		}
 		
@@ -98,23 +104,24 @@ public class ActionService {
 	//Method for end user to trigger an action
 	public String triggerAction(final String actionID){
 		if(actionID == null){
-			LOGGER.severe("ActionID can not be NULL");
-			return "ActionID can not be NULL";
+			LOGGER.severe(NULL_ACTION_MSG);
+			return NULL_ACTION_MSG;
 		}
 		else if(!isActionValid(actionID)){
-			LOGGER.severe("Invalid ActionID - " +actionID);
-			return "Invalid ActionID - " + actionID + " Not present in retrieved actions OR "
-					+ "Action Frequency is not valid";
+			String invalidMsg = String.format("Invalid ActionID - %s, Not present in retrieved actions OR "
+					                          + "Action Frequency is not valid", actionID);
+			LOGGER.severe(invalidMsg);
+			return invalidMsg;
 			
 		}
 		else {
 			Instant triggerTime = Instant.now();
 			String triggerResponse = postAction(actionID);
 			if(triggerResponse != null && !triggerResponse.contains("Not-OK") && triggerResponse.contains("OK")){
-				LOGGER.config("Action trigger successful for " + actionID + " , saving trigger time...");
+				LOGGER.config(String.format("Action trigger successful for %s, saving trigger time...", actionID));
 				ActionInfo action = new ActionInfo(actionID,Long.toString(triggerTime.getEpochSecond()));
-				keyStore.storeAction(action);
-				LOGGER.config("Trigger Time saved for action - " +actionID+ " : "+triggerTime.toString());
+				if(keyStore.storeAction(action) != 0l)
+					LOGGER.config(String.format("Trigger Time saved for action - %s : %s", actionID, triggerTime.toString()));
 			}
 			return triggerResponse;
 		}
@@ -127,8 +134,8 @@ public class ActionService {
 			return true;
 		}
 		else {
-			LOGGER.severe("Given actionID: "+actionID+" - Not present in retrieved actions OR "
-					+ "Action Frequency is not valid");
+			LOGGER.severe(String.format("Given actionID: %s - Not present in retrieved actions OR "
+					+ "Action Frequency is not valid", actionID));
 			return false;
 		}	
 	}
@@ -152,8 +159,9 @@ public class ActionService {
 				if(savedAction != null){
 					lastTriggerTimeInSeconds = Long.parseLong(savedAction.getLastTriggerTime());
 					long elapsedSeconds = triggerTime.getEpochSecond() - lastTriggerTimeInSeconds;
-					LOGGER.config("Action Frequency for " + actionID + " : " + action.getFrequency());
-					LOGGER.config("Number of seconds since from last trigger for action - " + actionID + " : "+elapsedSeconds);
+					LOGGER.config(String.format("Action Frequency for %s : %s", actionID, action.getFrequency()));
+					LOGGER.config(String.format("Number of seconds since from last trigger for action - %s : %d",
+							                                                   actionID, elapsedSeconds));
 					switch(action.getFrequency()){
 						case "always" : return true;
 						case "minutely": return elapsedSeconds > 60;

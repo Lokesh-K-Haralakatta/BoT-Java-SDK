@@ -26,19 +26,20 @@ Released into the repository BoT-Java-SDK.
 @RestController
 public class SDKController {
 	//Class Logger Instance
-	private final static Logger LOGGER = Logger.getLogger(SDKController.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(SDKController.class.getName());
 			
 	private static Boolean actionExistsWithServer(final String actionId){
 		List<ActionDTO> actions = ActionService.getActionServiceInstance().getActions();
+		String searchResult = String.format("Given actionId: %s not found with actions retrieved from server", actionId);
 		for(ActionDTO action : actions){
 			String serverActionId = action.getActionID();
-			LOGGER.config("Server Action ID: " + serverActionId);
 			if(serverActionId.compareToIgnoreCase(actionId) == 0){
-				LOGGER.config("Given actionId: " + actionId + " found with actions retrieved from server");
+				searchResult = String.format("Given actionId: %s found with actions retrieved from server", actionId);
+				LOGGER.config(searchResult);
 				return true;
 			}
 		}
-		LOGGER.severe("Given actionId: " + actionId + " not found with actions retrieved from server");
+		LOGGER.severe(searchResult);
 		return false;
 	}
 	
@@ -160,13 +161,13 @@ public class SDKController {
     public ResponseEntity<String> triggerAction(@RequestBody String jsonActionString){
     	
     	String bodyFormat = "{\" actionID \" : \"UUID4-actionId-String\" } ";
-			
+		String bodyContents = String.format("Required JSON Body Format: %s", bodyFormat);	
     	try {
     		if(!jsonActionString.contains("actionID"))
         		return ResponseEntity
     					.badRequest()
     					.contentType(MediaType.TEXT_PLAIN)
-    					.body("Required JSON Body Format: "+bodyFormat);
+    					.body(bodyContents);
     		
     		String parsedActionId = (jsonActionString.split(":")[1]).split("}")[0].trim();
     		
@@ -174,10 +175,10 @@ public class SDKController {
         		return ResponseEntity
     					.badRequest()
     					.contentType(MediaType.TEXT_PLAIN)
-    					.body("Required JSON Body Format: "+bodyFormat);
+    					.body(bodyContents);
     		
     		String actionId = parsedActionId.substring(1, parsedActionId.length()-1);
-    		LOGGER.config("Given Action ID: " + actionId);
+    		LOGGER.config(String.format("Given Action ID: %s", actionId));
     		if(KeyStore.getKeyStoreInstance().getDeviceState() == KeyStore.DEVICE_INVALID
     				|| KeyStore.getKeyStoreInstance().getDeviceState() < KeyStore.DEVICE_ACTIVE)
         		return ResponseEntity
@@ -199,7 +200,7 @@ public class SDKController {
     					.contentType(MediaType.TEXT_PLAIN)
     					.body("ActionId: "+ actionId + " does not exists with Server Actions"); 
     		else {
-    			LOGGER.config("Triggering the action with actionID: " + actionId);
+    			LOGGER.config(String.format("Triggering the action with actionID: ", actionId));
     			String response = ActionService.getActionServiceInstance().triggerAction(actionId);
     			if(response != null && response.contains("status\":\"OK"))
     				return ResponseEntity
@@ -217,7 +218,7 @@ public class SDKController {
     		return ResponseEntity
 					.badRequest()
 					.contentType(MediaType.TEXT_PLAIN)
-					.body("Required JSON Body Format: "+bodyFormat); 		
+					.body(bodyContents); 		
     	}
     	
     }

@@ -20,7 +20,7 @@ import com.finn.bot.store.KeyStore;
 
 public class BLEService {
 	//Class Logger Instance
-	private final static Logger LOGGER = Logger.getLogger(BLEService.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(BLEService.class.getName());
 	
 	//KeyStore Instance 
 	private final KeyStore keyStore = KeyStore.getKeyStoreInstance();
@@ -48,41 +48,44 @@ public class BLEService {
 	//Private class to use as thread instances to dump logs from executing process
 	private class PrintBLENOServiceOutput extends Thread {
 		//Class Logger Instance
-		private final Logger LOGGER = Logger.getLogger(PrintBLENOServiceOutput.class.getName());		
+		private final Logger bleServiceLOGGER = Logger.getLogger(PrintBLENOServiceOutput.class.getName());		
 		InputStream is = null;
  
-		PrintBLENOServiceOutput(InputStream is, String type) {
+		PrintBLENOServiceOutput(InputStream is) {
 			this.is = is;
 		}
  
+		@Override
 		public void run() {
 			String s = null;
 			try {
 				BufferedReader br = new BufferedReader(
 						new InputStreamReader(is));
 				while ((s = br.readLine()) != null) {
-					LOGGER.config(s);
+					bleServiceLOGGER.config(s);
 				}
 			} catch (IOException e) {
-				LOGGER.severe("Exception caught duirng dumping messages from bleno-service.js");
-				LOGGER.severe(ExceptionUtils.getStackTrace(e));
+				bleServiceLOGGER.severe("Exception caught duirng dumping messages from bleno-service.js");
+				bleServiceLOGGER.severe(ExceptionUtils.getStackTrace(e));
 			}
 		}
 	}
 	
-	//Method to return reference to new thread instance to dump logs
-	private PrintBLENOServiceOutput getStreamWrapper(InputStream is, String type) {
-		return new PrintBLENOServiceOutput(is, type);
-	}
-	
 	//Private class to execute BLENO Process on separate thread
 	private class BLENOProcessThread extends Thread {
+		//Method to return reference to new thread instance to dump logs
+		private PrintBLENOServiceOutput getStreamWrapper(InputStream is, String type) {
+			return new PrintBLENOServiceOutput(is);
+		}
+		
+		@Override
 		public void run() {
 			Runtime rt = Runtime.getRuntime();
-			PrintBLENOServiceOutput errorMessageThread, outputMessageThread;
+			PrintBLENOServiceOutput errorMessageThread;
+			PrintBLENOServiceOutput outputMessageThread;
 			
 			if(blenoCmdString != null) {
-				LOGGER.config("BLENO Service Command String: " + blenoCmdString);
+				LOGGER.config(String.format("BLENO Service Command String: %s", blenoCmdString));
 			
 			    try {
 			    	Process proc = rt.exec(blenoCmdString);
@@ -119,14 +122,15 @@ public class BLEService {
 		
 		//Check the existence of the bleno service file at prepared path
 		if(!Files.exists(Paths.get(blenoServicePath))){
-			LOGGER.severe("Invalid BLENO SERVICE Path: " + blenoServicePath);
+			LOGGER.severe(String.format("Invalid BLENO SERVICE Path: %s", blenoServicePath));
 			LOGGER.severe("Quitting Now... Please check and run again");
 			System.exit(-1);
 		}
 		
 		//Build the required arguments for bleno service
-		String blenoArgs = new String(keyStore.getMakerId() + " " + keyStore.getDeviceId() + " " + keyStore.getDeviceName() 
-		                                         + " " + keyStore.getKey(KeyStore.PUBLIC_KEY) + " ");
+		String blenoArgs = keyStore.getMakerId() + " " + keyStore.getDeviceId() + " " + keyStore.getDeviceName() 
+		                                         + " " + keyStore.getKey(KeyStore.PUBLIC_KEY) + " ";
+		
 		if(keyStore.getDeviceState() == KeyStore.DEVICE_MULTIPAIR){
 			blenoArgs += "1" + " " + keyStore.getDeviceAltId();
 		}

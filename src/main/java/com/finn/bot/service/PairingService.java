@@ -14,7 +14,7 @@ import com.finn.bot.store.KeyStore;
 
 public class PairingService {
 	//Class Logger Instance
-	private final static Logger LOGGER = Logger.getLogger(PairingService.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(PairingService.class.getName());
 	
 	//KeyStore Instance 
 	private final KeyStore keyStore = KeyStore.getKeyStoreInstance();
@@ -26,9 +26,9 @@ public class PairingService {
 	private static PairingService instance = new PairingService();
 		
 	//Pairing Service related constants
-	private final static Integer POLLING_INTERVAL_IN_MILLISECONDS = 10000;
-	private final static Integer MAXIMUM_TRIES = 10;
-	private final static String BoT_EndPoint = "/pair";
+	private static final Integer POLLING_INTERVAL_IN_MILLISECONDS = 10000;
+	private static final Integer MAXIMUM_TRIES = 10;
+	private static final String ENDPOINT = "/pair";
 	
 	//Make constructor as Private
 	private PairingService() {}
@@ -42,8 +42,8 @@ public class PairingService {
 	public Boolean isDevicePaired(){
 		Boolean pairingStatus = false;
 		try {
-				String response = bot.get(PairingService.BoT_EndPoint);
-				pairingStatus = (response != null && response.contains("true"))? true : false;
+				String response = bot.get(PairingService.ENDPOINT);
+				pairingStatus = (response != null && response.contains("true"));
 		}
 		catch(Exception e){
 			LOGGER.severe("Exception caught duirng retrieving pairing status from BoT Service");
@@ -59,13 +59,13 @@ public class PairingService {
 		int tries = 0;
 		do {
 			tries++;
-			LOGGER.config("Polling Device Pair Status - Attempt#" + tries + " ...");
+			LOGGER.config(String.format("Polling Device Pair Status - Attempt#%d ...", tries));
 			if(isDevicePaired()) {
 				return true;
 			}
 			Thread.sleep(PairingService.POLLING_INTERVAL_IN_MILLISECONDS);
 		}while(tries < PairingService.MAXIMUM_TRIES);
-		LOGGER.config("Device not paired in max attempts# "+tries+" , try again!!!");
+		LOGGER.config(String.format("Device not paired in max attempts#%d , try again!!!", tries));
 		return false;
 	}
 		
