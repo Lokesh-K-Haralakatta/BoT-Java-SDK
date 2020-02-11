@@ -64,12 +64,12 @@ public class BoTService {
 	private static BoTService instance = new BoTService();
 	
 	//BoT Service related constants
-	private static final String HOST = "iot.bankingofthings.io"; 
+	private static final String HOST = "iot.bankingofthings.io";
 	private static final String URI = "";
 	
 	//Root CA SSL Finger Print Values
-	private static final String ROOT_CA_FP_SHA1 = "76e6b6df6d3b4d2d48d1b632add68e80533f5f88"; 
-	private static final String ROOT_CA_FP_SHA256 = "56785dc285744405dca2dc37c8660ee591dfc73a7def24c4f3416250ac83e0b9";
+	private static final String ROOT_CA_FP_SHA1 = "3e18ee35dfca35d74bfb4eab9fa1b57a2d918d1f"; 
+	private static final String ROOT_CA_FP_SHA256 = "fb89fbdf920cadcb65b0fd5a5132c494c7d9c15092fa3cf0b6f43b2d8e38aef8";
 	
 	//MD Algorithms
 	private static final String sha1Algorithm = "SHA-1";
@@ -395,7 +395,7 @@ public class BoTService {
 			// Get API key from keysStore and load using X509 Spec
 			String apiKey = keyStore.getKey(KeyStore.API_KEY);
 			if(apiKey != null){
-				byte[] keyBytes = Base64.getDecoder().decode(apiKey);
+				byte[] keyBytes = Base64.getDecoder().decode(apiKey.replaceAll("[\n|\r]", ""));
 				X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
 				KeyFactory kf = KeyFactory.getInstance("RSA");
 				RSAPublicKey publicKey = (RSAPublicKey) kf.generatePublic(spec);

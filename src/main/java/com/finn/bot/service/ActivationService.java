@@ -78,10 +78,6 @@ public class ActivationService {
 			LOGGER.config("Device is already paired and activated OR Device is Multipair");
 			return;
 		}
-		else {
-			LOGGER.warning("Device is not paired yet, waiting for device to be paired...");
-			PairingService.getPairingServiceInstance().pairDevice();
-		}
 		
 		if(pollActivationStatus()){
 			if(keyStore.getDeviceState() != KeyStore.DEVICE_MULTIPAIR)
