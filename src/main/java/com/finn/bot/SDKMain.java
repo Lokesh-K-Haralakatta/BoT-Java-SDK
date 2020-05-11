@@ -6,6 +6,11 @@ Created by Lokesh H K, October 03, 2019.
 Released into the repository BoT-Java-SDK.
 */
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -17,7 +22,10 @@ import com.finn.bot.examples.SDKWebServerMultiPairSample;
 import com.finn.bot.examples.SDKWebServerSample;
 import com.finn.bot.examples.SDKWrapperLibMultiPairSample;
 import com.finn.bot.examples.SDKWrapperLibSample;
+import com.finn.bot.service.ConfigurationService;
+import com.finn.bot.store.KeyStore;
 import com.finn.bot.tests.IntegrationTests;
+import com.google.zxing.WriterException;
 
 /*
  * This file is the starting point for BoT-Java-SDK.
@@ -44,7 +52,10 @@ import com.finn.bot.tests.IntegrationTests;
 public class SDKMain {
 	//Class Logger Instance
 	private static final Logger LOGGER = Logger.getLogger(SDKMain.class.getName());
-		
+	//Required Java SDK Class Instances
+	private static final KeyStore keyStore = KeyStore.getKeyStoreInstance();
+	private static final ConfigurationService configService = ConfigurationService.getConfigurationServiceInstance();
+	
 	//Method to print usage format for Java SDK Main
 	private static void printUsage() {
 		LOGGER.info("Default Usage: java -jar BoT-Java-SDK-0.0.1-SNAPSHOT.jar [ config | server | tests | libSample | libMultiPairSample | serverSample | serverMultiPairSample ]");
@@ -67,10 +78,10 @@ public class SDKMain {
 		return epString.toString();
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, CertificateException, IOException, WriterException {
 		final String [] endPoints = { "	/qrcode ", " /actions ", " /pairing ", " /activate " };
 		final String falseStr = "false";
-		String makerId = "";
+		String makerId = null;
 		String deviceName = "BoT-Device-"+getRandomIntegerBetweenRange(1,100);
 		Boolean generateDeviceId = true;
 		Boolean multiPair = false;
@@ -116,9 +127,30 @@ public class SDKMain {
 							   System.exit(0);
 							   break;
 							   
-				case "server": LOGGER.info("Starting BoT-Java-SDK-Webserver with the end points: " + getEndpointsString(endPoints));
-				               SpringApplication.run(SDKMain.class, args); 
-				               break;
+				case "server": if(keyStore.getDeviceState() == KeyStore.DEVICE_INVALID) {
+									makerId = System.getProperty("maker.id");
+									if(makerId != null) {
+										LOGGER.info("Configuring the Device with the given details: ");
+										deviceName = System.getProperty("device.name", deviceName);
+										generateDeviceId = Boolean.valueOf(System.getProperty("generate.id", "true"));
+										multiPair = Boolean.valueOf(System.getProperty("multi.pair", falseStr));
+										altId = System.getProperty("alternate.id", "");
+										configStr = String.format("MakerId: %s DeviceName: %s Generate ID: %s  Multipair: %s AlternateId: %s",
+												                                              makerId, deviceName, generateDeviceId, multiPair,altId);
+										LOGGER.info(configStr);
+										configService.initializeDeviceConfiguration(makerId, deviceName, generateDeviceId, multiPair, altId);
+									} else {
+										LOGGER.info("Missing some of required SDK specific values, rerun as per below given usage");
+										LOGGER.info("Usage: java -Dmaker.id=makerID/productID -Ddevice.name=DeviceName [ -Dgenerate.id=true/false \\\r\n" + 
+												"       -Dmulti.pair=true/false -Dalternate.id=AlternateDeviceId ]  -jar BoT-Java-SDK.jar server");
+										System.exit(1);
+									}
+								}
+								
+								LOGGER.info("Starting BoT-Java-SDK-Webserver with the end points: " + getEndpointsString(endPoints));
+								SpringApplication.run(SDKMain.class, args);
+			 
+								break;
 				case "tests": try {
 								IntegrationTests.runTests();
 								System.exit(0);
