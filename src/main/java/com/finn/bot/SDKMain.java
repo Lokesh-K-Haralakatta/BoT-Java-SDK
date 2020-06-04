@@ -145,8 +145,13 @@ public class SDKMain {
 												"       -Dmulti.pair=true/false -Dalternate.id=AlternateDeviceId ]  -jar BoT-Java-SDK.jar server");
 										System.exit(1);
 									}
+								} else if(keyStore.getDeviceState() == KeyStore.DEVICE_NEW) {
+									LOGGER.info("Device is already configured and set to state NEW. Need to get paired and activated");
+								} else if(keyStore.getDeviceState() == KeyStore.DEVICE_MULTIPAIR) {
+									LOGGER.info("Device is configured as MULTIPAIR Device");
+								} else {
+									LOGGER.info("Device is already paired/activated and enabled for triggering payments");
 								}
-								
 								LOGGER.info("Starting BoT-Java-SDK-Webserver with the end points: " + getEndpointsString(endPoints));
 								SpringApplication.run(SDKMain.class, args);
 			 
