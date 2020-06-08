@@ -43,7 +43,7 @@ public class ActivationService {
 		Boolean activationStatus = false;
 		try {
 				String response = bot.post(ActivationService.ENDPOINT,null);
-				activationStatus = (response != null && response.equals(""));
+				activationStatus = (response != null && response.contains("deviceID"));
 		}
 		catch(Exception e){
 			LOGGER.severe("Exception caught duirng retrieving pairing status from BoT Service");
